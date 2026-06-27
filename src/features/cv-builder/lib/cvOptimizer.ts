@@ -5,6 +5,7 @@ import type {
   AIClientConfig,
 } from "@/shared/types";
 import { chatCompletion } from "@/shared/api/aiClient";
+import { parseAIJsonResponse } from "@/shared/lib/aiJson";
 
 export async function optimizeCV(
   config: AIClientConfig,
@@ -28,18 +29,7 @@ export async function optimizeCV(
     throw new Error("AI returned an empty response. Try again.");
   }
 
-  let parsed: Record<string, unknown>;
-  try {
-    parsed = JSON.parse(response.content);
-  } catch {
-    const match = response.content.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (match) {
-      parsed = JSON.parse(match[1]);
-    } else {
-      throw new Error("Failed to parse AI response as JSON.");
-    }
-  }
-
+  const parsed = parseAIJsonResponse<Record<string, unknown>>(response.content);
   return normalizeOptimizedCV(parsed, job);
 }
 
