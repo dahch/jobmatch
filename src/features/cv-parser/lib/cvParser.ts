@@ -28,7 +28,7 @@ export async function parseCVFile(
 
   // Check for scanned PDF (very little text extracted)
   if (ext === "pdf" && rawText.trim().length < 50) {
-    console.warn("PDF may be scanned image - very little text extracted");
+    if (import.meta.env.DEV) console.warn("PDF may be scanned image - very little text extracted");
   }
 
   return structureCVWithAI(rawText, config);

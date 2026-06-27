@@ -44,7 +44,7 @@ export const useCVStore = create<CVStore>((set, get) => ({
         ? { ...cv, raw_text: cv.raw_text.slice(0, 50000) }
         : cv;
     setStorageItem(PARSED_CV_KEY, toStore);
-    set({ parsedCV: cv });
+    set({ parsedCV: toStore });
   },
 
   addOptimizedCV: (jobId, cv) => {

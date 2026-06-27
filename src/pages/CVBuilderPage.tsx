@@ -72,7 +72,7 @@ export function CVBuilderPage() {
       const blob = await generatePDF(displayCV, template, accentColor);
       downloadBlob(blob, getFilename(displayCV));
     } catch (err) {
-      console.error("PDF generation failed:", err);
+      if (import.meta.env.DEV) console.error("PDF generation failed:", err);
     } finally {
       setDownloading(false);
     }
@@ -352,16 +352,14 @@ export function CVBuilderPage() {
             <CVDiffViewer original={parsedCV} optimized={displayCV} />
           )}
 
-          {showPreview && !editing && (
-            <div className="card overflow-hidden">
-              <div className="px-4 py-2.5 bg-surface-50 border-b border-surface-100 text-xs text-surface-400 text-center font-medium">
-                {t("cv_builder.pdf_preview")}
-              </div>
-              <PDFViewer width="100%" height={800} showToolbar={false}>
-                {renderTemplate(displayCV)}
-              </PDFViewer>
+          <div className={`card overflow-hidden ${showPreview && !editing ? "" : "hidden"}`}>
+            <div className="px-4 py-2.5 bg-surface-50 border-b border-surface-100 text-xs text-surface-400 text-center font-medium">
+              {t("cv_builder.pdf_preview")}
             </div>
-          )}
+            <PDFViewer width="100%" height={800} showToolbar={false}>
+              {renderTemplate(displayCV)}
+            </PDFViewer>
+          </div>
         </div>
       ) : null}
     </Layout>

@@ -32,7 +32,7 @@ export function CVUploadPage() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : t("cv.parse_failed");
       setError(msg);
-      console.error("CV parsing failed:", err);
+      if (import.meta.env.DEV) console.error("CV parsing failed:", err);
     } finally {
       setIsParsingCV(false);
     }
