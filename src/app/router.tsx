@@ -1,17 +1,24 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
-import { SettingsPage } from "@/pages/SettingsPage";
-import { SearchPage } from "@/pages/SearchPage";
-import { JobsPage } from "@/pages/JobsPage";
-import { CVUploadPage } from "@/pages/CVUploadPage";
-import { CVBuilderPage } from "@/pages/CVBuilderPage";
+import { Spinner } from "@/shared/ui";
+
+const SettingsPage = lazy(() => import("@/pages/SettingsPage").then(m => ({ default: m.SettingsPage })));
+const SearchPage = lazy(() => import("@/pages/SearchPage").then(m => ({ default: m.SearchPage })));
+const JobsPage = lazy(() => import("@/pages/JobsPage").then(m => ({ default: m.JobsPage })));
+const CVUploadPage = lazy(() => import("@/pages/CVUploadPage").then(m => ({ default: m.CVUploadPage })));
+const CVBuilderPage = lazy(() => import("@/pages/CVBuilderPage").then(m => ({ default: m.CVBuilderPage })));
+
+function LazyPage({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh]"><Spinner /></div>}>{children}</Suspense>;
+}
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: (
       <ErrorBoundary>
-        <SearchPage />
+        <LazyPage><SearchPage /></LazyPage>
       </ErrorBoundary>
     ),
   },
@@ -19,7 +26,7 @@ export const router = createBrowserRouter([
     path: "/search",
     element: (
       <ErrorBoundary>
-        <SearchPage />
+        <LazyPage><SearchPage /></LazyPage>
       </ErrorBoundary>
     ),
   },
@@ -27,7 +34,7 @@ export const router = createBrowserRouter([
     path: "/settings",
     element: (
       <ErrorBoundary>
-        <SettingsPage />
+        <LazyPage><SettingsPage /></LazyPage>
       </ErrorBoundary>
     ),
   },
@@ -35,7 +42,7 @@ export const router = createBrowserRouter([
     path: "/jobs",
     element: (
       <ErrorBoundary>
-        <JobsPage />
+        <LazyPage><JobsPage /></LazyPage>
       </ErrorBoundary>
     ),
   },
@@ -43,7 +50,7 @@ export const router = createBrowserRouter([
     path: "/cv/upload",
     element: (
       <ErrorBoundary>
-        <CVUploadPage />
+        <LazyPage><CVUploadPage /></LazyPage>
       </ErrorBoundary>
     ),
   },
@@ -51,7 +58,7 @@ export const router = createBrowserRouter([
     path: "/cv/builder",
     element: (
       <ErrorBoundary>
-        <CVBuilderPage />
+        <LazyPage><CVBuilderPage /></LazyPage>
       </ErrorBoundary>
     ),
   },
