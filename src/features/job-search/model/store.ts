@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { JobOffer } from "@/shared/types";
+import type { JobOffer, AIClientConfig } from "@/shared/types";
 import { getStorageItem, setStorageItem } from "@/shared/lib/storage";
 import { searchJobs } from "@/features/job-search/api/jobSearchAgent";
 
@@ -14,7 +14,7 @@ interface JobsStore {
   searchProgress: SearchProgress | null;
   searchError: string | null;
   selectedJobId: string | null;
-  searchJobs: () => Promise<void>;
+  searchJobs: (config: AIClientConfig) => Promise<void>;
   selectJob: (id: string) => void;
   updateJobStatus: (id: string, status: JobOffer["status"]) => void;
   clearJobs: () => void;
@@ -30,11 +30,10 @@ export const useJobsStore = create<JobsStore>((set, get) => ({
   searchError: null,
   selectedJobId: null,
 
-  searchJobs: async () => {
-    const { useAIProviderStore } = await import("@/features/ai-provider/model/store");
-    const { useJobSearchStore } = await import("@/features/job-search/model/profileStore");
+  searchJobs: async (config) => {
+    const { useJobSearchStore } =
+      await import("@/features/job-search/model/profileStore");
 
-    const config = useAIProviderStore.getState().config;
     const profile = useJobSearchStore.getState().profile;
 
     if (!config) {
@@ -42,11 +41,17 @@ export const useJobsStore = create<JobsStore>((set, get) => ({
       return;
     }
     if (!profile) {
-      set({ searchError: "Search profile not defined. Set your criteria first." });
+      set({
+        searchError: "Search profile not defined. Set your criteria first.",
+      });
       return;
     }
 
-    set({ isSearching: true, searchError: null, searchProgress: { phase: "Starting search..." } });
+    set({
+      isSearching: true,
+      searchError: null,
+      searchProgress: { phase: "Starting search..." },
+    });
 
     try {
       const newJobs = await searchJobs(config, profile, (progress) => {

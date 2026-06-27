@@ -9,7 +9,15 @@ import { useAIProviderStore } from "@/features/ai-provider/model/store";
 import { calculateMatchScore } from "@/features/job-search/api/matchScore";
 import { parseJDText } from "@/features/job-search/api/parseJD";
 import { JobDetailPanel } from "@/features/job-search/ui/JobDetailPanel";
-import { Briefcase, ExternalLink, Trash2, Search, FileText, ClipboardPlus, Loader2 } from "lucide-react";
+import {
+  Briefcase,
+  ExternalLink,
+  Trash2,
+  Search,
+  FileText,
+  ClipboardPlus,
+  Loader2,
+} from "lucide-react";
 import type { JobOffer } from "@/shared/types";
 
 const statusColors = {
@@ -22,8 +30,17 @@ const statusColors = {
 export function JobsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { jobs, isSearching, searchProgress, searchError, updateJobStatus, clearJobs, addJob } = useJobsStore();
-  const { parsedCV, isGeneratingCV, generationError, generateOptimizedCV } = useCVStore();
+  const {
+    jobs,
+    isSearching,
+    searchProgress,
+    searchError,
+    updateJobStatus,
+    clearJobs,
+    addJob,
+  } = useJobsStore();
+  const { parsedCV, isGeneratingCV, generationError, generateOptimizedCV } =
+    useCVStore();
   const aiConfig = useAIProviderStore((s) => s.config);
 
   const [selectedDetail, setSelectedDetail] = useState<JobOffer | null>(null);
@@ -42,8 +59,11 @@ export function JobsPage() {
   }, [parsedCV, jobs]);
 
   const handleGenerateCV = async (jobId: string) => {
-    await generateOptimizedCV(jobId);
-    navigate("/cv/builder");
+    const job = jobs.find((j) => j.id === jobId);
+    if (job && aiConfig) {
+      await generateOptimizedCV(job, aiConfig);
+      navigate("/cv/builder");
+    }
   };
 
   const handlePasteJD = async () => {
@@ -74,14 +94,22 @@ export function JobsPage() {
             <div className="w-9 h-9 rounded-xl bg-surface-100 flex items-center justify-center">
               <Briefcase size={18} className="text-surface-500" />
             </div>
-            <h1 className="text-xl font-semibold text-surface-900">{t("jobs.title")}</h1>
+            <h1 className="text-xl font-semibold text-surface-900">
+              {t("jobs.title")}
+            </h1>
           </div>
           <p className="text-sm text-surface-400 ml-12">
-            {jobs.length > 0 ? t("jobs_page.count_found", { count: jobs.length }) : t("jobs_page.count_none")}
+            {jobs.length > 0
+              ? t("jobs_page.count_found", { count: jobs.length })
+              : t("jobs_page.count_none")}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => setPasteOpen(true)}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setPasteOpen(true)}
+          >
             <ClipboardPlus size={14} className="mr-1" />
             {t("jobs.paste_jd")}
           </Button>
@@ -106,17 +134,23 @@ export function JobsPage() {
       )}
 
       {searchError && (
-        <div className="bg-red-50 border border-red-200/60 rounded-xl p-4 mb-4 text-sm text-red-600">{searchError}</div>
+        <div className="bg-red-50 border border-red-200/60 rounded-xl p-4 mb-4 text-sm text-red-600">
+          {searchError}
+        </div>
       )}
 
       {generationError && (
-        <div className="bg-red-50 border border-red-200/60 rounded-xl p-4 mb-4 text-sm text-red-600">{generationError}</div>
+        <div className="bg-red-50 border border-red-200/60 rounded-xl p-4 mb-4 text-sm text-red-600">
+          {generationError}
+        </div>
       )}
 
       {!parsedCV && jobs.length > 0 && (
         <div className="bg-amber-50 border border-amber-200/60 rounded-xl p-4 mb-4 text-sm text-amber-700">
           {t("jobs.upload_cv_hint")}{" "}
-          <a href="/cv/upload" className="underline font-medium text-amber-800">{t("jobs.upload_cv_link")}</a>
+          <a href="/cv/upload" className="underline font-medium text-amber-800">
+            {t("jobs.upload_cv_link")}
+          </a>
         </div>
       )}
 
@@ -125,11 +159,17 @@ export function JobsPage() {
           <div className="w-16 h-16 rounded-2xl bg-surface-100 flex items-center justify-center mx-auto mb-5">
             <Briefcase className="h-7 w-7 text-surface-300" />
           </div>
-          <p className="text-base font-medium text-surface-700 mb-1">{t("jobs.no_jobs")}</p>
+          <p className="text-base font-medium text-surface-700 mb-1">
+            {t("jobs.no_jobs")}
+          </p>
           <p className="text-sm text-surface-400 mb-5">{t("jobs_page.hint")}</p>
           <div className="flex items-center justify-center gap-3">
-            <Button onClick={() => navigate("/search")}>{t("jobs.go_to_search")}</Button>
-            <Button variant="outline" onClick={() => setPasteOpen(true)}>{t("jobs.paste_a_jd")}</Button>
+            <Button onClick={() => navigate("/search")}>
+              {t("jobs.go_to_search")}
+            </Button>
+            <Button variant="outline" onClick={() => setPasteOpen(true)}>
+              {t("jobs.paste_a_jd")}
+            </Button>
           </div>
         </div>
       ) : (
@@ -144,46 +184,91 @@ export function JobsPage() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-[15px] font-semibold text-surface-800 group-hover:text-brand-600 transition-colors">{job.title}</h3>
-                    <p className="text-sm text-surface-500 mt-0.5">{job.company} · {job.location}</p>
+                    <h3 className="text-[15px] font-semibold text-surface-800 group-hover:text-brand-600 transition-colors">
+                      {job.title}
+                    </h3>
+                    <p className="text-sm text-surface-500 mt-0.5">
+                      {job.company} · {job.location}
+                    </p>
                     <div className="flex items-center gap-2 mt-1.5">
-                      <span className="text-[11px] text-surface-400 font-mono">{job.source_portal}</span>
-                      {job.modality !== "Unknown" && <Badge variant="default">{job.modality}</Badge>}
+                      <span className="text-[11px] text-surface-400 font-mono">
+                        {job.source_portal}
+                      </span>
+                      {job.modality !== "Unknown" && (
+                        <Badge variant="default">{job.modality}</Badge>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
-                    <Badge variant={statusColors[job.status]}>{t(`jobs.status.${job.status}`)}</Badge>
+                    <Badge variant={statusColors[job.status]}>
+                      {t(`jobs.status.${job.status}`)}
+                    </Badge>
                     {match && (
-                      <Badge variant={match.score >= 70 ? "success" : match.score >= 40 ? "warning" : "danger"}>
+                      <Badge
+                        variant={
+                          match.score >= 70
+                            ? "success"
+                            : match.score >= 40
+                              ? "warning"
+                              : "danger"
+                        }
+                      >
                         {match.score}%
                       </Badge>
                     )}
-                    <a href={job.url || `https://www.google.com/search?q=${encodeURIComponent(job.company + " " + job.title + " jobs")}`}
-                      target="_blank" rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()} className="text-surface-300 hover:text-brand-500 transition-colors">
+                    <a
+                      href={
+                        job.url ||
+                        `https://www.google.com/search?q=${encodeURIComponent(job.company + " " + job.title + " jobs")}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-surface-300 hover:text-brand-500 transition-colors"
+                    >
                       <ExternalLink size={15} />
                     </a>
                   </div>
                 </div>
                 {job.raw_description && (
-                  <p className="mt-2.5 text-sm text-surface-500 line-clamp-2 leading-relaxed">{job.raw_description.slice(0, 250)}...</p>
+                  <p className="mt-2.5 text-sm text-surface-500 line-clamp-2 leading-relaxed">
+                    {job.raw_description.slice(0, 250)}...
+                  </p>
                 )}
                 {job.extracted_requirements.technologies.length > 0 && (
                   <div className="mt-2.5 flex flex-wrap gap-1">
-                    {job.extracted_requirements.technologies.slice(0, 6).map((tech) => (
-                      <span key={tech} className="text-[10px] bg-surface-100 text-surface-600 px-1.5 py-0.5 rounded font-medium">{tech}</span>
-                    ))}
+                    {job.extracted_requirements.technologies
+                      .slice(0, 6)
+                      .map((tech) => (
+                        <span
+                          key={tech}
+                          className="text-[10px] bg-surface-100 text-surface-600 px-1.5 py-0.5 rounded font-medium"
+                        >
+                          {tech}
+                        </span>
+                      ))}
                     {job.extracted_requirements.technologies.length > 6 && (
-                      <span className="text-[10px] text-surface-400">+{t("jobs_page.more", { count: job.extracted_requirements.technologies.length - 6 })}</span>
+                      <span className="text-[10px] text-surface-400">
+                        +
+                        {t("jobs_page.more", {
+                          count:
+                            job.extracted_requirements.technologies.length - 6,
+                        })}
+                      </span>
                     )}
                   </div>
                 )}
                 <div className="mt-3 pt-3 border-t border-surface-100 flex items-center justify-between">
                   <div className="flex gap-1">
-                    {(["new", "reviewing", "applied", "discarded"] as const).map((status) => (
+                    {(
+                      ["new", "reviewing", "applied", "discarded"] as const
+                    ).map((status) => (
                       <button
                         key={status}
-                        onClick={(e) => { e.stopPropagation(); updateJobStatus(job.id, status); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateJobStatus(job.id, status);
+                        }}
                         className={`text-[11px] px-2 py-1 rounded-md font-medium transition-all ${
                           job.status === status
                             ? "bg-brand-50 text-brand-600 border border-brand-100"
@@ -195,9 +280,17 @@ export function JobsPage() {
                     ))}
                   </div>
                   {parsedCV && (
-                      <Button size="sm" onClick={(e) => { e.stopPropagation(); handleGenerateCV(job.id); }} isLoading={isGeneratingCV}>
-                        <FileText size={13} className="mr-1" /> {t("jobs.generate_cv")}
-                      </Button>
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleGenerateCV(job.id);
+                      }}
+                      isLoading={isGeneratingCV}
+                    >
+                      <FileText size={13} className="mr-1" />{" "}
+                      {t("jobs.generate_cv")}
+                    </Button>
                   )}
                 </div>
               </div>
@@ -206,7 +299,14 @@ export function JobsPage() {
         </div>
       )}
 
-      <Modal isOpen={pasteOpen} onClose={() => { setPasteOpen(false); setPasteError(null); }} title={t("jd_paste.title")}>
+      <Modal
+        isOpen={pasteOpen}
+        onClose={() => {
+          setPasteOpen(false);
+          setPasteError(null);
+        }}
+        title={t("jd_paste.title")}
+      >
         <div className="space-y-4">
           <textarea
             value={pasteText}
@@ -217,8 +317,20 @@ export function JobsPage() {
           />
           {pasteError && <p className="text-sm text-red-500">{pasteError}</p>}
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => { setPasteOpen(false); setPasteError(null); }}>{t("jd_paste.cancel")}</Button>
-            <Button onClick={handlePasteJD} isLoading={parsing} disabled={!pasteText.trim()}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setPasteOpen(false);
+                setPasteError(null);
+              }}
+            >
+              {t("jd_paste.cancel")}
+            </Button>
+            <Button
+              onClick={handlePasteJD}
+              isLoading={parsing}
+              disabled={!pasteText.trim()}
+            >
               {parsing ? t("jd_paste.parsing") : t("jd_paste.parse")}
             </Button>
           </div>
