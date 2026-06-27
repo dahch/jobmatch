@@ -34,16 +34,15 @@ export const useAIProviderStore = create<AIProviderStore>((set, get) => ({
 
     try {
       const { chatCompletion } = await import("@/shared/api/aiClient");
-      const response = await chatCompletion(
+      await chatCompletion(
         config,
         [{ role: "user", content: "Respond with: OK" }],
         {
-          max_tokens: 10,
+          max_tokens: 50,
         },
       );
-      const ok = response.content.trim().includes("OK");
-      set({ isConnected: ok });
-      return ok;
+      set({ isConnected: true });
+      return true;
     } catch {
       set({ isConnected: false });
       return false;

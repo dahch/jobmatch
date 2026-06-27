@@ -20,6 +20,7 @@ const providers: { value: Provider; label: string }[] = [
   { value: "openrouter", label: "OpenRouter" },
   { value: "anthropic", label: "Anthropic" },
   { value: "gemini", label: "Google Gemini" },
+  { value: "deepseek", label: "DeepSeek" },
   { value: "opencode", label: "OpenCode" },
   { value: "custom", label: "Custom (OpenAI-compatible)" },
 ];
@@ -51,7 +52,7 @@ export function SettingsPage() {
     ? allModels.filter((m) => m.toLowerCase().includes(model.toLowerCase()))
     : allModels;
 
-  const fetchModels = async () => {
+  const fetchModels = async (signal?: AbortSignal) => {
     if (!apiKey) return;
     setFetchingModels(true);
     setModelsError(false);
@@ -59,7 +60,9 @@ export function SettingsPage() {
       provider,
       apiKey,
       provider === "custom" || provider === "opencode" ? baseUrl : undefined,
+      signal,
     );
+    if (signal?.aborted) return;
     if (models.length === 0 && staticModels.length === 0) {
       setModelsError(true);
     }
@@ -68,11 +71,13 @@ export function SettingsPage() {
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     if (apiKey) {
-      fetchModels();
+      fetchModels(controller.signal);
     } else {
       setFetchedModels([]);
     }
+    return () => controller.abort();
   }, [provider, apiKey, baseUrl]);
 
   useEffect(() => {
@@ -204,7 +209,7 @@ export function SettingsPage() {
             </label>
             <button
               type="button"
-              onClick={fetchModels}
+              onClick={() => fetchModels()}
               disabled={!apiKey || fetchingModels}
               className="text-xs text-brand-600 hover:text-brand-700 flex items-center gap-1 disabled:opacity-40 transition-colors"
             >

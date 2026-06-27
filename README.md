@@ -6,12 +6,12 @@
 
 ## Overview
 
-JobMatch AI helps you find job offers and tailor your CV for each one using AI. It connects to your preferred AI provider (OpenAI, Anthropic, Gemini, OpenRouter, or any OpenAI-compatible endpoint), discovers matching jobs from major portals, parses your existing CV, and generates ATS-optimized PDF versions tailored to specific job descriptions.
+JobMatch AI helps you find job offers and tailor your CV for each one using AI. It connects to your preferred AI provider (OpenAI, Anthropic, Gemini, DeepSeek, OpenRouter, or any OpenAI-compatible endpoint), uses AI to generate matching job listings based on your profile, parses your existing CV, and generates ATS-optimized PDF versions tailored to specific job descriptions.
 
 **Key capabilities:**
 
-- Multi-provider AI configuration (OpenAI, Anthropic, Google Gemini, OpenRouter, OpenCode, Custom)
-- AI-powered job discovery from LinkedIn, Indeed, InfoJobs, and other portals
+- Multi-provider AI configuration (OpenAI, Anthropic, Google Gemini, DeepSeek, OpenRouter, OpenCode, Custom)
+- AI-generated job discovery matching your search profile
 - CV parsing from PDF, DOCX, and TXT files
 - AI-generated CVs optimized for specific job offers (ATS-friendly)
 - 3 PDF templates: Minimalist, Professional, Technical
@@ -38,7 +38,7 @@ JobMatch AI helps you find job offers and tailor your CV for each one using AI. 
 ## Prerequisites
 
 - Node.js >= 18
-- npm (or pnpm/yarn)
+- pnpm
 - An API key from one of the supported AI providers
 
 ## Getting Started
@@ -53,7 +53,7 @@ JobMatch AI helps you find job offers and tailor your CV for each one using AI. 
 2. **Install dependencies**
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Configure environment variables**
@@ -66,14 +66,12 @@ JobMatch AI helps you find job offers and tailor your CV for each one using AI. 
 
    | Variable | Type | Default | Description |
    |---|---|---|---|
-   | `VITE_CORS_PROXY_URL` | `string` | `""` | URL of a CORS proxy for job scraping requests |
-   | `VITE_ENABLE_JOB_SCRAPING` | `boolean` | `true` | Enable AI-driven job scraping from portals |
-   | `VITE_ENABLE_TOOL_USE` | `boolean` | `true` | Enable AI tool-use (function calling) features |
+   | `VITE_CORS_PROXY_URL` | `string` | `""` | (Planned) URL of a CORS proxy for job scraping requests |
 
 4. **Start the dev server**
 
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
 5. **Configure your AI provider**
@@ -84,13 +82,13 @@ JobMatch AI helps you find job offers and tailor your CV for each one using AI. 
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start Vite dev server |
-| `npm run build` | Type-check + production build |
-| `npm run preview` | Preview the production build locally |
-| `npm run test` | Run tests once (vitest) |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run lint` | Lint with ESLint |
-| `npm run format` | Format source files with Prettier |
+| `pnpm dev` | Start Vite dev server |
+| `pnpm build` | Type-check + production build |
+| `pnpm preview` | Preview the production build locally |
+| `pnpm test` | Run tests once (vitest) |
+| `pnpm test:watch` | Run tests in watch mode |
+| `pnpm lint` | Lint with ESLint |
+| `pnpm format` | Format source files with Prettier |
 
 ## Project Structure
 
@@ -163,7 +161,7 @@ JobMatch AI runs entirely in the browser. There is no backend server.
 - **No analytics, no tracking, no telemetry.**
 - **No data persistence beyond your browser.** Clearing localStorage removes all data.
 
-If you need to access AI APIs that have CORS restrictions, configure `VITE_CORS_PROXY_URL` to route requests through your own proxy.
+If you need to access AI APIs that have CORS restrictions, you can configure a CORS proxy and use the `VITE_CORS_PROXY_URL` environment variable. Note that this feature is planned and not yet implemented.
 
 ## License
 

@@ -4,7 +4,7 @@
 Scaffold Vite + React 18 + TypeScript, install all dependencies, configure Tailwind CSS v3, set up FSD folder structure, shared UI components, Zustand stores skeleton, routing, and i18n foundation. This is the foundation everything else builds on — no feature code can start without it.
 
 ## Phase 2: AI Provider Config + aiClient Abstraction
-Build the provider settings page and the `aiClient.ts` module that normalizes requests across OpenAI, OpenRouter, Anthropic, and custom providers. This is critical because every subsequent feature (job search, CV parsing, CV generation) depends on the AI client being functional and testable.
+Build the provider settings page and the `aiClient.ts` module that normalizes requests across OpenAI, OpenRouter, Anthropic, Gemini, DeepSeek, OpenCode, and custom providers. This is critical because every subsequent feature (job search, CV parsing, CV generation) depends on the AI client being functional and testable.
 
 ## Phase 3: Search Profile Form + Store
 Implement the structured job search profile form and persist it to localStorage. This is needed before job search can work, and is a self-contained form + store feature with no external dependencies beyond Phase 2's types.

@@ -3,6 +3,7 @@ export type Provider =
   | "openrouter"
   | "anthropic"
   | "gemini"
+  | "deepseek"
   | "opencode"
   | "custom";
 
@@ -54,11 +55,12 @@ export const PROVIDER_MODELS: Record<Provider, string[]> = {
     "gemini-2.0-flash",
     "gemini-1.5-pro",
   ],
+  deepseek: ["deepseek-chat", "deepseek-reasoner"],
   opencode: [],
   custom: [],
 };
 
-export const PROVIDER_BASE_URLS: Record<Exclude<Provider, "custom">, string> = {
+export const PROVIDER_BASE_URLS: Record<Exclude<Provider, "custom" | "deepseek">, string> = {
   openai: "https://api.openai.com/v1",
   openrouter: "https://openrouter.ai/api/v1",
   anthropic: "https://api.anthropic.com/v1",

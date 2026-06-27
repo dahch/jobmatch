@@ -60,6 +60,12 @@ function getEndpoint(provider: Provider, baseUrl?: string): ProviderEndpoint {
         },
         errorLabel: "OpenRouter",
       };
+    case "deepseek":
+      return {
+        url: "https://api.deepseek.com/v1/chat/completions",
+        headers: {},
+        errorLabel: "DeepSeek",
+      };
     case "opencode":
       if (!baseUrl) throw new Error("OpenCode provider requires a base URL");
       return {
@@ -255,6 +261,7 @@ export async function chatCompletion(
   switch (config.provider) {
     case "openai":
     case "openrouter":
+    case "deepseek":
     case "opencode":
     case "custom":
       return openAICompatibleCompletion(config, messages, options);
@@ -300,16 +307,19 @@ export async function listModels(
   provider: Provider,
   apiKey: string,
   baseUrl?: string,
+  signal?: AbortSignal,
 ): Promise<string[]> {
   try {
     switch (provider) {
       case "openai":
+        if (signal?.aborted) return [];
         return listOpenAICompatibleModels(
           "https://api.openai.com/v1/models",
           { Authorization: `Bearer ${apiKey}` },
           (id) => id.includes("gpt") || id.includes("o1") || id.includes("o3"),
         );
       case "openrouter":
+        if (signal?.aborted) return [];
         return listOpenAICompatibleModels(
           "https://openrouter.ai/api/v1/models",
           {
@@ -318,24 +328,8 @@ export async function listModels(
           },
         );
       case "anthropic": {
-        const res = await fetchWithRetry(
-          "https://api.anthropic.com/v1/messages",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-api-key": apiKey,
-              "anthropic-version": "2023-06-01",
-              "anthropic-dangerous-direct-browser-access": "true",
-            },
-            body: JSON.stringify({
-              model: "claude-3-5-haiku-20241022",
-              max_tokens: 1,
-              messages: [{ role: "user", content: "hi" }],
-            }),
-          },
-        );
-        if (res.status === 401 || res.status === 403) return [];
+        // Anthropic has no public model listing endpoint
+        // Return known Claude models statically
         return [
           "claude-3-5-sonnet-20241022",
           "claude-3-5-haiku-20241022",
@@ -343,9 +337,18 @@ export async function listModels(
         ];
       }
       case "gemini":
+        if (signal?.aborted) return [];
         return listGeminiModels(apiKey);
+      case "deepseek":
+        if (signal?.aborted) return [];
+        return listOpenAICompatibleModels(
+          "https://api.deepseek.com/v1/models",
+          { Authorization: `Bearer ${apiKey}` },
+          (id) => id.includes("deepseek"),
+        );
       case "opencode":
       case "custom":
+        if (signal?.aborted) return [];
         if (!baseUrl) return [];
         return listOpenAICompatibleModels(`${baseUrl}/models`, {
           Authorization: `Bearer ${apiKey}`,
