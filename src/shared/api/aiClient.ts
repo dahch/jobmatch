@@ -159,6 +159,7 @@ async function anthropicCompletion(
       "Content-Type": "application/json",
       "x-api-key": config.apiKey,
       "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
     },
     body: JSON.stringify(body),
   });
@@ -325,16 +326,21 @@ export async function listModels(
               "Content-Type": "application/json",
               "x-api-key": apiKey,
               "anthropic-version": "2023-06-01",
+              "anthropic-dangerous-direct-browser-access": "true",
             },
             body: JSON.stringify({
-              model: "claude-haiku-3-5-20241022",
+              model: "claude-3-5-haiku-20241022",
               max_tokens: 1,
               messages: [{ role: "user", content: "hi" }],
             }),
           },
         );
         if (res.status === 401 || res.status === 403) return [];
-        return ["claude-opus-4-5", "claude-sonnet-4-5", "claude-haiku-3-5"];
+        return [
+          "claude-3-5-sonnet-20241022",
+          "claude-3-5-haiku-20241022",
+          "claude-3-opus-20240229",
+        ];
       }
       case "gemini":
         return listGeminiModels(apiKey);
