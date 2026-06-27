@@ -1,7 +1,11 @@
 import type { AIClientConfig, SearchProfile, JobOffer } from "@/shared/types";
-import { chatCompletion } from "@/features/ai-provider/api/aiClient";
+import { chatCompletion } from "@/shared/api/aiClient";
 import { generateId } from "@/shared/lib/utils";
-import { normalizeModality, toStringArray, parseAIJsonResponse } from "@/shared/lib/aiJson";
+import {
+  normalizeModality,
+  toStringArray,
+  parseAIJsonResponse,
+} from "@/shared/lib/aiJson";
 
 interface SearchProgress {
   phase: string;
@@ -11,7 +15,7 @@ interface SearchProgress {
 export async function searchJobs(
   config: AIClientConfig,
   profile: SearchProfile,
-  onProgress?: (progress: SearchProgress) => void
+  onProgress?: (progress: SearchProgress) => void,
 ): Promise<JobOffer[]> {
   const notify = (p: SearchProgress) => onProgress?.(p);
 
@@ -19,7 +23,10 @@ export async function searchJobs(
 
   const prompt = buildSearchPrompt(profile);
 
-  notify({ phase: "Asking AI to find job listings...", detail: `Using ${config.model}` });
+  notify({
+    phase: "Asking AI to find job listings...",
+    detail: `Using ${config.model}`,
+  });
 
   const response = await chatCompletion(
     config,
@@ -27,20 +34,28 @@ export async function searchJobs(
     {
       temperature: 0.3,
       max_tokens: 8000,
-    }
+    },
   );
 
   if (!response.content || response.content.trim().length === 0) {
-    throw new Error("AI returned an empty response. Try again or use a different model.");
+    throw new Error(
+      "AI returned an empty response. Try again or use a different model.",
+    );
   }
 
   notify({ phase: "Parsing results..." });
 
   const data = parseAIJsonResponse<{ jobs: unknown[] }>(response.content);
-  const rawJobs = Array.isArray(data.jobs) ? data.jobs : Array.isArray(data) ? data : [];
+  const rawJobs = Array.isArray(data.jobs)
+    ? data.jobs
+    : Array.isArray(data)
+      ? data
+      : [];
 
   const jobs: JobOffer[] = rawJobs
-    .filter((j): j is Record<string, unknown> => typeof j === "object" && j !== null)
+    .filter(
+      (j): j is Record<string, unknown> => typeof j === "object" && j !== null,
+    )
     .map((j) => normalizeJobOffer(j));
 
   notify({ phase: `Found ${jobs.length} jobs` });
@@ -51,7 +66,7 @@ export async function searchJobs(
 function buildSearchPrompt(profile: SearchProfile): string {
   const parts: string[] = [
     "You are a job search assistant. Generate realistic job listings matching these criteria.",
-    "Return ONLY valid JSON with a \"jobs\" array. No markdown, no explanations.",
+    'Return ONLY valid JSON with a "jobs" array. No markdown, no explanations.',
     "",
     "Schema for each job:",
     `{ "title": "string", "company": "string", "location": "string", "modality": "Remote|Hybrid|On-site|Unknown", "url": "string — company career page URL or empty", "source_portal": "string", "posted_at": "ISO date string or null", "raw_description": "string — concise 50-100 word summary", "extracted_requirements": { "must_have": ["string"], "nice_to_have": ["string"], "technologies": ["string"], "years_experience": number|null, "seniority_level": "string|null", "languages": ["string"] }, "ats_keywords": ["string"] }`,
@@ -111,8 +126,13 @@ function normalizeJobOffer(raw: Record<string, unknown>): JobOffer {
       must_have: toStringArray(req.must_have),
       nice_to_have: toStringArray(req.nice_to_have),
       technologies: toStringArray(req.technologies),
-      years_experience: typeof req.years_experience === "number" ? req.years_experience : undefined,
-      seniority_level: req.seniority_level ? String(req.seniority_level) : undefined,
+      years_experience:
+        typeof req.years_experience === "number"
+          ? req.years_experience
+          : undefined,
+      seniority_level: req.seniority_level
+        ? String(req.seniority_level)
+        : undefined,
       languages: toStringArray(req.languages),
     },
     ats_keywords: toStringArray(raw.ats_keywords),

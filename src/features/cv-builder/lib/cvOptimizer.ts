@@ -1,11 +1,16 @@
-import type { ParsedCV, JobOffer, OptimizedCV, AIClientConfig } from "@/shared/types";
-import { chatCompletion } from "@/features/ai-provider/api/aiClient";
+import type {
+  ParsedCV,
+  JobOffer,
+  OptimizedCV,
+  AIClientConfig,
+} from "@/shared/types";
+import { chatCompletion } from "@/shared/api/aiClient";
 
 export async function optimizeCV(
   config: AIClientConfig,
   parsedCV: ParsedCV,
   job: JobOffer,
-  extraInstructions?: string
+  extraInstructions?: string,
 ): Promise<OptimizedCV> {
   const prompt = buildOptimizationPrompt(parsedCV, job, extraInstructions);
 
@@ -16,7 +21,7 @@ export async function optimizeCV(
       temperature: 0.2,
       max_tokens: 16000,
       response_format: { type: "json_object" },
-    }
+    },
   );
 
   if (!response.content || response.content.trim().length === 0) {
@@ -41,7 +46,7 @@ export async function optimizeCV(
 function buildOptimizationPrompt(
   cv: ParsedCV,
   job: JobOffer,
-  extraInstructions?: string
+  extraInstructions?: string,
 ): string {
   const parts: string[] = [
     "You are an expert technical CV writer and ATS optimization specialist.",
@@ -68,17 +73,20 @@ function buildOptimizationPrompt(
         full_name: "string — same as original",
         contact: "{ email, phone, linkedin, github, portfolio, location }",
         summary: "string — new targeted summary (2-3 sentences)",
-        work_experience: "[{ company, title, start_date, end_date, location, description, technologies, achievements }] — reordered by relevance, reformulated",
+        work_experience:
+          "[{ company, title, start_date, end_date, location, description, technologies, achievements }] — reordered by relevance, reformulated",
         skills: "[{ category, items }] — reordered by relevance to the JD",
-        education: "[{ institution, degree, field, start_date, end_date }] — unchanged",
+        education:
+          "[{ institution, degree, field, start_date, end_date }] — unchanged",
         languages: "[{ language, level }] — unchanged",
         certifications: "[{ name, issuer, date }] — unchanged if present",
-        projects: "[{ name, description, technologies, url }] — selected by relevance if present",
+        projects:
+          "[{ name, description, technologies, url }] — selected by relevance if present",
         ats_keywords_used: "[string] — JD keywords incorporated",
         changes_summary: "[string] — list of changes made",
       },
       null,
-      2
+      2,
     ),
     "",
     "ORIGINAL CV (structured):",
@@ -95,7 +103,7 @@ function buildOptimizationPrompt(
         projects: cv.projects,
       },
       null,
-      2
+      2,
     ),
     "",
     "JOB DESCRIPTION:",
@@ -123,20 +131,39 @@ function buildOptimizationPrompt(
   return parts.join("\n");
 }
 
-function normalizeOptimizedCV(raw: Record<string, unknown>, job: JobOffer): OptimizedCV {
+function normalizeOptimizedCV(
+  raw: Record<string, unknown>,
+  job: JobOffer,
+): OptimizedCV {
   return {
     target_job: String(raw.target_job || job.title),
     target_company: String(raw.target_company || job.company),
     full_name: String(raw.full_name || "Unknown"),
     contact: (raw.contact as OptimizedCV["contact"]) || {},
     summary: String(raw.summary || ""),
-    work_experience: Array.isArray(raw.work_experience) ? raw.work_experience as OptimizedCV["work_experience"] : [],
-    skills: Array.isArray(raw.skills) ? raw.skills as OptimizedCV["skills"] : [],
-    education: Array.isArray(raw.education) ? raw.education as OptimizedCV["education"] : [],
-    languages: Array.isArray(raw.languages) ? raw.languages as OptimizedCV["languages"] : [],
-    certifications: Array.isArray(raw.certifications) ? raw.certifications as OptimizedCV["certifications"] : undefined,
-    projects: Array.isArray(raw.projects) ? raw.projects as OptimizedCV["projects"] : undefined,
-    ats_keywords_used: Array.isArray(raw.ats_keywords_used) ? raw.ats_keywords_used.map(String) : [],
-    changes_summary: Array.isArray(raw.changes_summary) ? raw.changes_summary.map(String) : [],
+    work_experience: Array.isArray(raw.work_experience)
+      ? (raw.work_experience as OptimizedCV["work_experience"])
+      : [],
+    skills: Array.isArray(raw.skills)
+      ? (raw.skills as OptimizedCV["skills"])
+      : [],
+    education: Array.isArray(raw.education)
+      ? (raw.education as OptimizedCV["education"])
+      : [],
+    languages: Array.isArray(raw.languages)
+      ? (raw.languages as OptimizedCV["languages"])
+      : [],
+    certifications: Array.isArray(raw.certifications)
+      ? (raw.certifications as OptimizedCV["certifications"])
+      : undefined,
+    projects: Array.isArray(raw.projects)
+      ? (raw.projects as OptimizedCV["projects"])
+      : undefined,
+    ats_keywords_used: Array.isArray(raw.ats_keywords_used)
+      ? raw.ats_keywords_used.map(String)
+      : [],
+    changes_summary: Array.isArray(raw.changes_summary)
+      ? raw.changes_summary.map(String)
+      : [],
   };
 }

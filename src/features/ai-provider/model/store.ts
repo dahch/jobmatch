@@ -33,10 +33,14 @@ export const useAIProviderStore = create<AIProviderStore>((set, get) => ({
     if (!config) return false;
 
     try {
-      const { chatCompletion } = await import("@/features/ai-provider/api/aiClient");
-      const response = await chatCompletion(config, [{ role: "user", content: "Respond with: OK" }], {
-        max_tokens: 10,
-      });
+      const { chatCompletion } = await import("@/shared/api/aiClient");
+      const response = await chatCompletion(
+        config,
+        [{ role: "user", content: "Respond with: OK" }],
+        {
+          max_tokens: 10,
+        },
+      );
       const ok = response.content.trim().includes("OK");
       set({ isConnected: ok });
       return ok;

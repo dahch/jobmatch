@@ -1,11 +1,15 @@
 import type { AIClientConfig, JobOffer } from "@/shared/types";
-import { chatCompletion } from "@/features/ai-provider/api/aiClient";
+import { chatCompletion } from "@/shared/api/aiClient";
 import { generateId } from "@/shared/lib/utils";
-import { normalizeModality, toStringArray, parseAIJsonResponse } from "@/shared/lib/aiJson";
+import {
+  normalizeModality,
+  toStringArray,
+  parseAIJsonResponse,
+} from "@/shared/lib/aiJson";
 
 export async function parseJDText(
   config: AIClientConfig,
-  rawText: string
+  rawText: string,
 ): Promise<JobOffer> {
   const prompt = `You are a recruitment specialist. Parse the following job description into a structured JSON object.
 
@@ -45,7 +49,7 @@ ${rawText}`;
       temperature: 0,
       max_tokens: 4000,
       response_format: { type: "json_object" },
-    }
+    },
   );
 
   if (!response.content || response.content.trim().length === 0) {
@@ -68,8 +72,13 @@ ${rawText}`;
       must_have: toStringArray(req.must_have),
       nice_to_have: toStringArray(req.nice_to_have),
       technologies: toStringArray(req.technologies),
-      years_experience: typeof req.years_experience === "number" ? req.years_experience : undefined,
-      seniority_level: req.seniority_level ? String(req.seniority_level) : undefined,
+      years_experience:
+        typeof req.years_experience === "number"
+          ? req.years_experience
+          : undefined,
+      seniority_level: req.seniority_level
+        ? String(req.seniority_level)
+        : undefined,
       languages: toStringArray(req.languages),
     },
     ats_keywords: toStringArray(parsed.ats_keywords),

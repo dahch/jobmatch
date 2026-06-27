@@ -1,10 +1,13 @@
-import type { ParsedCV } from "@/shared/types";
+import type { ParsedCV, AIClientConfig } from "@/shared/types";
 import { parseAIJsonResponse } from "@/shared/lib/aiJson";
 
 /**
  * Parse a CV file (PDF, DOCX, or TXT) into raw text, then structure it via AI.
  */
-export async function parseCVFile(file: File): Promise<ParsedCV> {
+export async function parseCVFile(
+  file: File,
+  config: AIClientConfig,
+): Promise<ParsedCV> {
   const ext = file.name.split(".").pop()?.toLowerCase();
 
   let rawText: string;
@@ -28,7 +31,7 @@ export async function parseCVFile(file: File): Promise<ParsedCV> {
     console.warn("PDF may be scanned image - very little text extracted");
   }
 
-  return structureCVWithAI(rawText);
+  return structureCVWithAI(rawText, config);
 }
 
 async function parsePDF(file: File): Promise<string> {
@@ -58,15 +61,11 @@ async function parseDOCX(file: File): Promise<string> {
   return result.value;
 }
 
-async function structureCVWithAI(rawText: string): Promise<ParsedCV> {
-  // Dynamically import to avoid circular deps
-  const { useAIProviderStore } = await import("@/features/ai-provider/model/store");
-  const { chatCompletion } = await import("@/features/ai-provider/api/aiClient");
-
-  const config = useAIProviderStore.getState().config;
-  if (!config) {
-    throw new Error("AI provider not configured. Go to Settings first.");
-  }
+async function structureCVWithAI(
+  rawText: string,
+  config: AIClientConfig,
+): Promise<ParsedCV> {
+  const { chatCompletion } = await import("@/shared/api/aiClient");
 
   const prompt = `You are an expert assistant specializing in human resources and technical CVs.
 You are provided with text extracted from a CV. Your task is to structure it into an exact JSON object following the provided schema.
@@ -93,14 +92,20 @@ SCHEMA:
 CV TEXT:
 ${rawText.slice(0, 15000)}`;
 
-  const response = await chatCompletion(config, [{ role: "user", content: prompt }], {
-    temperature: 0,
-    max_tokens: 16000,
-    response_format: { type: "json_object" },
-  });
+  const response = await chatCompletion(
+    config,
+    [{ role: "user", content: prompt }],
+    {
+      temperature: 0,
+      max_tokens: 16000,
+      response_format: { type: "json_object" },
+    },
+  );
 
   if (!response.content || response.content.trim().length === 0) {
-    throw new Error("AI returned an empty response. Try a different model or reduce CV length.");
+    throw new Error(
+      "AI returned an empty response. Try a different model or reduce CV length.",
+    );
   }
 
   const parsed = parseAIJsonResponse(response.content);
@@ -109,7 +114,8 @@ ${rawText.slice(0, 15000)}`;
     full_name: (parsed.full_name as string) || "Unknown",
     contact: (parsed.contact as ParsedCV["contact"]) || {},
     summary: parsed.summary as string | undefined,
-    work_experience: (parsed.work_experience as ParsedCV["work_experience"]) || [],
+    work_experience:
+      (parsed.work_experience as ParsedCV["work_experience"]) || [],
     education: (parsed.education as ParsedCV["education"]) || [],
     skills: (parsed.skills as ParsedCV["skills"]) || [],
     languages: (parsed.languages as ParsedCV["languages"]) || [],
