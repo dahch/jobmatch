@@ -73,7 +73,7 @@ export function CVUploadPage() {
         }}
         onDragLeave={() => setDragActive(false)}
         onDrop={handleDrop}
-        className={`relative border-2 border-dashed rounded-2xl p-14 text-center transition-all duration-200 cursor-pointer ${
+        className={`relative border-2 border-dashed rounded-2xl p-6 sm:p-14 text-center transition-all duration-200 cursor-pointer ${
           dragActive
             ? "border-brand-400 bg-brand-50/50 shadow-glow"
             : "border-surface-200 hover:border-surface-300 hover:bg-surface-50/50"
@@ -163,7 +163,7 @@ export function CVUploadPage() {
             <FileText size={16} className="text-surface-400" />
             {t("cv_upload.preview_title")}
           </h2>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
             <div>
               <span className="text-xs text-surface-400 block">
                 {t("cv_upload.name")}

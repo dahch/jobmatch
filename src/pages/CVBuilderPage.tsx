@@ -226,7 +226,7 @@ export function CVBuilderPage() {
       ) : displayCV ? (
         <div className="space-y-4 animate-fade-in">
           <div className="card p-5">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 pb-4 border-b border-surface-200">
               <div>
                 <h2 className="text-base font-semibold text-surface-800">
                   {displayCV.target_job}
@@ -235,7 +235,7 @@ export function CVBuilderPage() {
                   {displayCV.target_company}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <div className="relative">
                   <select
                     value={template}

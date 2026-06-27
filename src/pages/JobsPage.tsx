@@ -182,7 +182,7 @@ export function JobsPage() {
                 onClick={() => setSelectedDetail(job)}
                 className="card-interactive p-4 group"
               >
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <h3 className="text-[15px] font-semibold text-surface-800 group-hover:text-brand-600 transition-colors">
                       {job.title}
@@ -199,7 +199,7 @@ export function JobsPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-2 sm:ml-4 sm:self-start self-end">
                     <Badge variant={statusColors[job.status]}>
                       {t(`jobs.status.${job.status}`)}
                     </Badge>
@@ -258,8 +258,8 @@ export function JobsPage() {
                     )}
                   </div>
                 )}
-                <div className="mt-3 pt-3 border-t border-surface-100 flex items-center justify-between">
-                  <div className="flex gap-1">
+                <div className="mt-3 pt-3 border-t border-surface-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex flex-wrap gap-1">
                     {(
                       ["new", "reviewing", "applied", "discarded"] as const
                     ).map((status) => (

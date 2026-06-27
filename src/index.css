@@ -106,15 +106,19 @@
   * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    border-color: theme('colors.surface.200');
+    border-color: theme("colors.surface.200");
   }
 
   body {
     @apply bg-surface-50 text-surface-600 font-sans;
-    background-image: 
+    background-image:
       radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.03) 0px, transparent 50%),
       radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.02) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.02) 0px, transparent 50%);
+      radial-gradient(
+        at 100% 100%,
+        rgba(99, 102, 241, 0.02) 0px,
+        transparent 50%
+      );
     background-attachment: fixed;
   }
 
@@ -174,7 +178,12 @@
 
   .glow-line {
     height: 1px;
-    background: linear-gradient(to right, transparent, var(--glow-line-color), transparent);
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--glow-line-color),
+      transparent
+    );
   }
 
   .text-gradient {
@@ -182,7 +191,10 @@
   }
 
   /* Custom input styling overrides for premium technical feel */
-  input[type="text"], input[type="password"], textarea, select {
+  input[type="text"],
+  input[type="password"],
+  textarea,
+  select {
     background-color: var(--color-surface-100);
     border: 1px solid var(--color-surface-200);
     color: var(--color-surface-800);
@@ -192,7 +204,10 @@
     line-height: 1.25rem;
     transition: all 0.2s;
   }
-  input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
+  input[type="text"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
     outline: none;
     border-color: var(--color-brand-500);
     box-shadow: 0 0 0 3px var(--focus-ring-color);
