@@ -10,7 +10,9 @@ export function generateId(): string {
 }
 
 export function formatDate(date: string): string {
-  return new Date(date).toLocaleDateString("en-US", {
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return date;
+  return d.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
   });
