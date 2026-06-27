@@ -1,7 +1,8 @@
+import { type ReactNode } from "react";
 import { cn } from "@/shared/lib/utils";
 
 interface BadgeProps {
-  children: React.ReactNode;
+  children: ReactNode;
   variant?: "default" | "success" | "warning" | "danger" | "info" | "brand";
   className?: string;
 }
