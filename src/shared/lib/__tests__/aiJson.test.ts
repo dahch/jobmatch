@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { normalizeModality, toStringArray, repairTruncatedJSON, parseAIJsonResponse } from "@/shared/lib/aiJson";
+import {
+  normalizeModality,
+  toStringArray,
+  repairTruncatedJSON,
+  parseAIJsonResponse,
+} from "@/shared/lib/aiJson";
 
 describe("normalizeModality", () => {
   it("normalizes common values", () => {
@@ -58,7 +63,8 @@ describe("repairTruncatedJSON", () => {
   });
 
   it("removes repeated token corruption", () => {
-    const input = '{"jobs":[{"title":"test"}],"company","company","company","company","company"}';
+    const input =
+      '{"jobs":[{"title":"test"}],"company","company","company","company","company"}';
     const result = repairTruncatedJSON(input);
     expect(() => JSON.parse(result)).not.toThrow();
   });

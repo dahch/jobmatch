@@ -15,24 +15,42 @@ export interface MatchResult {
 }
 
 export function calculateMatchScore(cv: ParsedCV, job: JobOffer): MatchResult {
-  const cvSkills = new Set(cv.skills.flatMap((s) => (s.items || []).map((i) => i.toLowerCase())));
-  const cvTech = new Set(cv.work_experience.flatMap((e) => (e.technologies || []).map((t) => t.toLowerCase())));
-  const jobTech = new Set(job.extracted_requirements.technologies.map((t) => t.toLowerCase()));
-  const jobMustHave = new Set(job.extracted_requirements.must_have.map((s) => s.toLowerCase()));
-  const jobNiceToHave = new Set(job.extracted_requirements.nice_to_have.map((s) => s.toLowerCase()));
+  const cvSkills = new Set(
+    cv.skills.flatMap((s) => (s.items || []).map((i) => i.toLowerCase())),
+  );
+  const cvTech = new Set(
+    cv.work_experience.flatMap((e) =>
+      (e.technologies || []).map((t) => t.toLowerCase()),
+    ),
+  );
+  const jobTech = new Set(
+    job.extracted_requirements.technologies.map((t) => t.toLowerCase()),
+  );
+  const jobMustHave = new Set(
+    job.extracted_requirements.must_have.map((s) => s.toLowerCase()),
+  );
+  const jobNiceToHave = new Set(
+    job.extracted_requirements.nice_to_have.map((s) => s.toLowerCase()),
+  );
   const jobKeywords = new Set(job.ats_keywords.map((k) => k.toLowerCase()));
 
   // Skills match (what the JD requires that the CV has)
-  const allJobReqs = new Set([...jobMustHave, ...jobNiceToHave, ...jobKeywords]);
+  const allJobReqs = new Set([
+    ...jobMustHave,
+    ...jobNiceToHave,
+    ...jobKeywords,
+  ]);
   const matchedSkills: string[] = [];
   const missingSkills: string[] = [];
 
   for (const req of allJobReqs) {
-    const found = cvSkills.has(req) ||
+    const found =
+      cvSkills.has(req) ||
       [...cvTech].some((t) => req.includes(t) || t.includes(req)) ||
-      cv.work_experience.some((e) =>
-        (e.description || "").toLowerCase().includes(req) ||
-        (e.achievements || []).some((a) => a.toLowerCase().includes(req))
+      cv.work_experience.some(
+        (e) =>
+          (e.description || "").toLowerCase().includes(req) ||
+          (e.achievements || []).some((a) => a.toLowerCase().includes(req)),
       );
     if (found) {
       matchedSkills.push(req);
@@ -41,19 +59,23 @@ export function calculateMatchScore(cv: ParsedCV, job: JobOffer): MatchResult {
     }
   }
 
-  const skillsScore = allJobReqs.size > 0
-    ? Math.round((matchedSkills.length / allJobReqs.size) * 100)
-    : 50;
+  const skillsScore =
+    allJobReqs.size > 0
+      ? Math.round((matchedSkills.length / allJobReqs.size) * 100)
+      : 50;
 
   // Technologies match
   const matchedTech: string[] = [];
   const missingTech: string[] = [];
 
   for (const tech of jobTech) {
-    const found = cvTech.has(tech) ||
+    const found =
+      cvTech.has(tech) ||
       cvSkills.has(tech) ||
       cv.work_experience.some((e) =>
-        (e.technologies || []).some((t) => t.toLowerCase() === tech || t.toLowerCase().includes(tech))
+        (e.technologies || []).some(
+          (t) => t.toLowerCase() === tech || t.toLowerCase().includes(tech),
+        ),
       );
     if (found) {
       matchedTech.push(tech);
@@ -62,14 +84,17 @@ export function calculateMatchScore(cv: ParsedCV, job: JobOffer): MatchResult {
     }
   }
 
-  const techScore = jobTech.size > 0
-    ? Math.round((matchedTech.length / jobTech.size) * 100)
-    : 50;
+  const techScore =
+    jobTech.size > 0
+      ? Math.round((matchedTech.length / jobTech.size) * 100)
+      : 50;
 
   // Experience level match
   const totalYears = cv.work_experience.reduce((acc, exp) => {
     const start = parseYear(exp.start_date);
-    const end = exp.end_date ? parseYear(exp.end_date) : new Date().getFullYear();
+    const end = exp.end_date
+      ? parseYear(exp.end_date)
+      : new Date().getFullYear();
     return acc + Math.max(0, end - start);
   }, 0);
 
@@ -89,7 +114,8 @@ export function calculateMatchScore(cv: ParsedCV, job: JobOffer): MatchResult {
 
   // Seniority match
   const cvLevel = inferSeniority(totalYears);
-  const jobLevel = job.extracted_requirements.seniority_level?.toLowerCase() || "";
+  const jobLevel =
+    job.extracted_requirements.seniority_level?.toLowerCase() || "";
   let seniorityScore = 60;
   if (!jobLevel || jobLevel === "any") {
     seniorityScore = 80;
@@ -107,9 +133,9 @@ export function calculateMatchScore(cv: ParsedCV, job: JobOffer): MatchResult {
   // Weighted final score
   const score = Math.round(
     skillsScore * 0.3 +
-    techScore * 0.35 +
-    expScore * 0.2 +
-    seniorityScore * 0.15
+      techScore * 0.35 +
+      expScore * 0.2 +
+      seniorityScore * 0.15,
   );
 
   return {

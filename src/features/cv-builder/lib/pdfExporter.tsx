@@ -8,14 +8,18 @@ import type { TemplateName } from "../templates";
 export async function generatePDF(
   cv: OptimizedCV,
   template: TemplateName,
-  accentColor?: string
+  accentColor?: string,
 ): Promise<Blob> {
   const doc = renderTemplate(cv, template, accentColor);
   const blob = await pdf(doc).toBlob();
   return blob;
 }
 
-function renderTemplate(cv: OptimizedCV, template: TemplateName, accentColor?: string) {
+function renderTemplate(
+  cv: OptimizedCV,
+  template: TemplateName,
+  accentColor?: string,
+) {
   switch (template) {
     case "professional":
       return <ProfessionalTemplate cv={cv} accentColor={accentColor} />;

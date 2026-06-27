@@ -2,22 +2,129 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-white: #ffffff;
+  --color-surface-0: #ffffff;
+  --color-surface-50: #f8fafc;
+  --color-surface-100: #f1f5f9;
+  --color-surface-200: #e2e8f0;
+  --color-surface-300: #cbd5e1;
+  --color-surface-400: #94a3b8;
+  --color-surface-500: #64748b;
+  --color-surface-600: #475569;
+  --color-surface-700: #334155;
+  --color-surface-800: #1e293b;
+  --color-surface-900: #0f172a;
+  --color-surface-950: #020617;
+
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #d9e6ff;
+  --color-brand-200: #bcd4ff;
+  --color-brand-300: #8eb8ff;
+  --color-brand-400: #5991ff;
+  --color-brand-500: #3366ff;
+  --color-brand-600: #1a44f5;
+  --color-brand-700: #1332e1;
+  --color-brand-800: #162ab6;
+  --color-brand-900: #18298f;
+  --color-brand-950: #141a57;
+
+  --color-sidebar-bg: #f8fafc;
+  --color-sidebar-border: #e2e8f0;
+  --color-sidebar-text: #1e293b;
+  --color-sidebar-muted: #64748b;
+  --color-sidebar-active-bg: rgba(99, 102, 241, 0.06);
+  --color-sidebar-active-text: #4f46e5;
+  --color-sidebar-hover-bg: rgba(99, 102, 241, 0.03);
+  --color-sidebar-active-border: #4f46e5;
+
+  --scrollbar-thumb-color: rgba(148, 163, 184, 0.4);
+  --scrollbar-thumb-hover-color: rgba(100, 116, 139, 0.6);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(226, 232, 240, 0.4);
+  --glass-dark-bg: rgba(15, 20, 36, 0.7);
+  --glass-dark-border: rgba(21, 29, 48, 0.6);
+  --card-border: rgba(226, 232, 240, 0.5);
+  --card-hover-border: rgba(99, 102, 241, 0.3);
+  --card-hover-shadow: rgba(99, 102, 241, 0.08);
+  --glow-line-color: rgba(99, 102, 241, 0.3);
+  --focus-ring-color: rgba(51, 102, 255, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-white: #0b0f19;
+    --color-surface-0: #0e1424;
+    --color-surface-50: #05070c;
+    --color-surface-100: #0f1424;
+    --color-surface-200: #1e293b;
+    --color-surface-300: #334155;
+    --color-surface-400: #64748b;
+    --color-surface-500: #94a3b8;
+    --color-surface-600: #cbd5e1;
+    --color-surface-700: #e2e8f0;
+    --color-surface-800: #f1f5f9;
+    --color-surface-900: #f8fafc;
+    --color-surface-950: #ffffff;
+
+    --color-brand-50: rgba(99, 102, 241, 0.15);
+    --color-brand-100: rgba(99, 102, 241, 0.25);
+    --color-brand-200: #c7d2fe;
+    --color-brand-300: #a5b4fc;
+    --color-brand-400: #818cf8;
+    --color-brand-500: #6366f1;
+    --color-brand-600: #4f46e5;
+    --color-brand-700: #4338ca;
+    --color-brand-800: #3730a3;
+    --color-brand-900: #312e81;
+    --color-brand-950: #1e1b4b;
+
+    --color-sidebar-bg: #050811;
+    --color-sidebar-border: rgba(21, 29, 48, 0.6);
+    --color-sidebar-text: #ffffff;
+    --color-sidebar-muted: #94a3b8;
+    --color-sidebar-active-bg: rgba(99, 102, 241, 0.1);
+    --color-sidebar-active-text: #a5b4fc;
+    --color-sidebar-hover-bg: rgba(99, 102, 241, 0.05);
+    --color-sidebar-active-border: #818cf8;
+
+    --scrollbar-thumb-color: rgba(51, 65, 85, 0.5);
+    --scrollbar-thumb-hover-color: rgba(71, 85, 105, 0.7);
+    --glass-bg: rgba(14, 20, 36, 0.7);
+    --glass-border: rgba(30, 41, 59, 0.4);
+    --glass-dark-bg: rgba(8, 12, 20, 0.85);
+    --glass-dark-border: rgba(21, 29, 48, 0.8);
+    --card-border: rgba(30, 41, 59, 0.6);
+    --card-hover-border: rgba(99, 102, 241, 0.4);
+    --card-hover-shadow: rgba(99, 102, 241, 0.15);
+    --glow-line-color: rgba(99, 102, 241, 0.4);
+    --focus-ring-color: rgba(99, 102, 241, 0.25);
+  }
+}
+
 @layer base {
   * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    border-color: theme('colors.surface.200');
   }
 
   body {
-    @apply bg-surface-50 text-surface-800 font-sans;
+    @apply bg-surface-50 text-surface-600 font-sans;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.03) 0px, transparent 50%),
+      radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.02) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.02) 0px, transparent 50%);
+    background-attachment: fixed;
   }
 
   ::selection {
-    @apply bg-brand-200 text-brand-900;
+    background-color: rgba(99, 102, 241, 0.35);
+    color: var(--color-brand-200);
   }
 
   ::-webkit-scrollbar {
-    @apply w-1.5;
+    @apply w-1.5 h-1.5;
   }
 
   ::-webkit-scrollbar-track {
@@ -25,32 +132,74 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-surface-300 rounded-full hover:bg-surface-400 transition-colors;
+    background-color: var(--scrollbar-thumb-color);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover-color);
   }
 }
 
 @layer components {
   .glass {
-    @apply bg-white/80 backdrop-blur-xl border border-white/20;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
   }
 
   .glass-dark {
-    @apply bg-surface-900/80 backdrop-blur-xl border border-white/10;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    background-color: var(--glass-dark-bg);
+    border: 1px solid var(--glass-dark-border);
   }
 
   .card {
-    @apply bg-white rounded-xl border border-surface-200/80 shadow-card;
+    background-color: var(--color-white);
+    border-radius: 0.75rem;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .card-interactive {
-    @apply card cursor-pointer transition-all duration-200 hover:shadow-card-hover hover:border-surface-300/80 hover:-translate-y-0.5;
+    @apply cursor-pointer;
+  }
+  .card-interactive:hover {
+    border-color: var(--card-hover-border);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px -4px var(--card-hover-shadow);
   }
 
   .glow-line {
-    @apply h-px bg-gradient-to-r from-transparent via-brand-500/40 to-transparent;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--glow-line-color), transparent);
   }
 
   .text-gradient {
-    @apply bg-gradient-to-r from-brand-500 to-brand-700 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-brand-500 via-brand-600 to-indigo-600 dark:from-brand-300 dark:via-brand-400 dark:to-indigo-300 bg-clip-text text-transparent;
+  }
+
+  /* Custom input styling overrides for premium technical feel */
+  input[type="text"], input[type="password"], textarea, select {
+    background-color: var(--color-surface-100);
+    border: 1px solid var(--color-surface-200);
+    color: var(--color-surface-800);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition: all 0.2s;
+  }
+  input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--color-brand-500);
+    box-shadow: 0 0 0 3px var(--focus-ring-color);
+  }
+
+  /* Active states and tag inputs */
+  .badge-tech {
+    @apply font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-surface-100 border border-surface-200 text-surface-500;
   }
 }

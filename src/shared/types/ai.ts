@@ -1,4 +1,10 @@
-export type Provider = "openai" | "openrouter" | "anthropic" | "gemini" | "opencode" | "custom";
+export type Provider =
+  | "openai"
+  | "openrouter"
+  | "anthropic"
+  | "gemini"
+  | "opencode"
+  | "custom";
 
 export interface AIClientConfig {
   provider: Provider;
@@ -38,7 +44,12 @@ export const PROVIDER_MODELS: Record<Provider, string[]> = {
     "meta-llama/llama-3.1-70b-instruct",
   ],
   anthropic: ["claude-opus-4-5", "claude-sonnet-4-5", "claude-haiku-3-5"],
-  gemini: ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"],
+  gemini: [
+    "gemini-2.5-pro",
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-pro",
+  ],
   opencode: [],
   custom: [],
 };

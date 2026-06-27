@@ -2,11 +2,24 @@ import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import type { OptimizedCV } from "@/shared/types";
 
 const styles = StyleSheet.create({
-  page: { padding: 40, fontSize: 10, fontFamily: "Helvetica", color: "#1a1a1a" },
+  page: {
+    padding: 40,
+    fontSize: 10,
+    fontFamily: "Helvetica",
+    color: "#1a1a1a",
+  },
   name: { fontSize: 22, fontFamily: "Helvetica-Bold", marginBottom: 4 },
   contact: { fontSize: 9, color: "#555", marginBottom: 16 },
   section: { marginBottom: 12 },
-  sectionTitle: { fontSize: 11, fontFamily: "Helvetica-Bold", textTransform: "uppercase" as const, borderBottomWidth: 1, borderBottomColor: "#ccc", paddingBottom: 3, marginBottom: 6 },
+  sectionTitle: {
+    fontSize: 11,
+    fontFamily: "Helvetica-Bold",
+    textTransform: "uppercase" as const,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    paddingBottom: 3,
+    marginBottom: 6,
+  },
   jobTitle: { fontFamily: "Helvetica-Bold", fontSize: 10 },
   company: { fontSize: 9, color: "#555" },
   dates: { fontSize: 8, color: "#888" },
@@ -22,7 +35,12 @@ export function MinimalTemplate({ cv }: { cv: OptimizedCV }) {
       <Page size="A4" style={styles.page}>
         <Text style={styles.name}>{cv.full_name}</Text>
         <Text style={styles.contact}>
-          {[cv.contact.email, cv.contact.phone, cv.contact.location, cv.contact.linkedin]
+          {[
+            cv.contact.email,
+            cv.contact.phone,
+            cv.contact.location,
+            cv.contact.linkedin,
+          ]
             .filter(Boolean)
             .join(" · ")}
         </Text>
@@ -40,11 +58,20 @@ export function MinimalTemplate({ cv }: { cv: OptimizedCV }) {
             {cv.work_experience.map((exp, i) => (
               <View key={i} style={{ marginBottom: 8 }}>
                 <Text style={styles.jobTitle}>{exp.title}</Text>
-                <Text style={styles.company}>{exp.company}{exp.location ? ` · ${exp.location}` : ""}</Text>
-                <Text style={styles.dates}>{exp.start_date} — {exp.end_date || "Present"}</Text>
-                {exp.description && <Text style={styles.bullet}>{exp.description}</Text>}
+                <Text style={styles.company}>
+                  {exp.company}
+                  {exp.location ? ` · ${exp.location}` : ""}
+                </Text>
+                <Text style={styles.dates}>
+                  {exp.start_date} — {exp.end_date || "Present"}
+                </Text>
+                {exp.description && (
+                  <Text style={styles.bullet}>{exp.description}</Text>
+                )}
                 {exp.achievements.map((a, j) => (
-                  <Text key={j} style={styles.bullet}>• {a}</Text>
+                  <Text key={j} style={styles.bullet}>
+                    • {a}
+                  </Text>
                 ))}
               </View>
             ))}
@@ -68,7 +95,8 @@ export function MinimalTemplate({ cv }: { cv: OptimizedCV }) {
             <Text style={styles.sectionTitle}>Education</Text>
             {cv.education.map((edu, i) => (
               <Text key={i} style={{ fontSize: 9, marginBottom: 2 }}>
-                {edu.degree}{edu.field ? ` in ${edu.field}` : ""} — {edu.institution}
+                {edu.degree}
+                {edu.field ? ` in ${edu.field}` : ""} — {edu.institution}
                 {edu.end_date ? ` (${edu.end_date})` : ""}
               </Text>
             ))}

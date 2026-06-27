@@ -10,7 +10,13 @@ interface ModalProps {
   className?: string;
 }
 
-export function Modal({ isOpen, onClose, title, children, className }: ModalProps) {
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+  className,
+}: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,11 +44,15 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
       <div
         className={cn(
           "relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-panel border border-surface-200/50 animate-slide-up",
-          className
+          className,
         )}
       >
         <div className="flex items-center justify-between mb-5">
-          {title && <h2 className="text-base font-semibold text-surface-800">{title}</h2>}
+          {title && (
+            <h2 className="text-base font-semibold text-surface-800">
+              {title}
+            </h2>
+          )}
           <button
             onClick={onClose}
             className="text-surface-400 hover:text-surface-600 hover:bg-surface-100 rounded-lg p-1 transition-colors ml-auto"

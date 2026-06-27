@@ -5,7 +5,8 @@ const resources = {
   en: {
     translation: {
       app_name: "JobMatch AI",
-      privacy_notice: "Your CV and API key never leave your browser. Data is sent only to the AI provider you configure.",
+      privacy_notice:
+        "Your CV and API key never leave your browser. Data is sent only to the AI provider you configure.",
       nav: {
         search: "Search",
         jobs: "Jobs",
@@ -29,7 +30,8 @@ const resources = {
         model_placeholder: "Type to search or enter a custom model",
         model_no_key: "Enter your API key to fetch available models.",
         model_manual: "No models available. Type a model name above.",
-        models_fetch_error: "Could not fetch models. You can type a model name manually.",
+        models_fetch_error:
+          "Could not fetch models. You can type a model name manually.",
       },
       search: {
         title: "Job Search Profile",
@@ -54,13 +56,14 @@ const resources = {
         parse_failed: "CV parsing failed",
         upload_different: "Upload a different CV",
         preview_title: "Parsed CV Preview",
-        scanned_warning: "Your PDF seems to be an image. Extracted text may be incomplete.",
+        scanned_warning:
+          "Your PDF seems to be an image. Extracted text may be incomplete.",
       },
       cv_builder: {
         title: "CV Builder",
         upload_first: "Upload your CV first",
         no_cvs: "No optimized CVs yet",
-        no_cvs_hint: "Go to Jobs, select an offer, and click \"Generate CV\"",
+        no_cvs_hint: 'Go to Jobs, select an offer, and click "Generate CV"',
         browse_jobs: "Browse Jobs",
         edit: "Edit",
         done: "Done",
@@ -126,13 +129,15 @@ const resources = {
         view_original: "View original",
       },
       search_page: {
-        subtitle: "Define what you are looking for and let AI find matching jobs",
+        subtitle:
+          "Define what you are looking for and let AI find matching jobs",
         placeholder_titles: "e.g. Senior Software Engineer",
         placeholder_tech: "e.g. TypeScript, React, Node.js",
         placeholder_location: "e.g. Barcelona, Spain or Remote (EU)",
         placeholder_exclude: "e.g. PHP, WordPress",
         placeholder_context: "Any additional context for the AI...",
-        configure_provider: "Configure your AI provider in Settings before searching.",
+        configure_provider:
+          "Configure your AI provider in Settings before searching.",
       },
       cv_upload: {
         subtitle: "Upload your CV in PDF, DOCX, or TXT format",
@@ -157,7 +162,8 @@ const resources = {
       },
       settings_page: {
         subtitle: "Configure your AI provider to get started",
-        api_key_hint: "Your API key stays in your browser and is never sent to our servers.",
+        api_key_hint:
+          "Your API key stays in your browser and is never sent to our servers.",
         fetching: "Fetching...",
         loading_models: "Loading models...",
         placeholder_model: "e.g. gpt-4o",
@@ -167,7 +173,8 @@ const resources = {
   es: {
     translation: {
       app_name: "JobMatch AI",
-      privacy_notice: "Tu CV y clave API nunca salen de tu navegador. Los datos se envían solo al proveedor de IA que configures.",
+      privacy_notice:
+        "Tu CV y clave API nunca salen de tu navegador. Los datos se envían solo al proveedor de IA que configures.",
       nav: {
         search: "Buscar",
         jobs: "Empleos",
@@ -185,13 +192,18 @@ const resources = {
         save: "Guardar",
         connection_ok: "¡Conectado!",
         connection_fail: "Conexión fallida. Verifica tu clave API.",
-        no_provider: "Configura tu proveedor de IA en Configuración antes de buscar.",
+        no_provider:
+          "Configura tu proveedor de IA en Configuración antes de buscar.",
         refresh_models: "Actualizar modelos",
         fetching_models: "Cargando...",
-        model_placeholder: "Escribe para buscar o ingresa un modelo personalizado",
-        model_no_key: "Ingresa tu clave API para obtener los modelos disponibles.",
-        model_manual: "No hay modelos disponibles. Escribe un nombre de modelo.",
-        models_fetch_error: "No se pudieron obtener los modelos. Puedes escribir uno manualmente.",
+        model_placeholder:
+          "Escribe para buscar o ingresa un modelo personalizado",
+        model_no_key:
+          "Ingresa tu clave API para obtener los modelos disponibles.",
+        model_manual:
+          "No hay modelos disponibles. Escribe un nombre de modelo.",
+        models_fetch_error:
+          "No se pudieron obtener los modelos. Puedes escribir uno manualmente.",
       },
       search: {
         title: "Perfil de Búsqueda de Empleo",
@@ -216,13 +228,15 @@ const resources = {
         parse_failed: "Error al analizar el CV",
         upload_different: "Subir otro CV",
         preview_title: "Vista Previa del CV",
-        scanned_warning: "Tu PDF parece ser una imagen. El texto extraído puede estar incompleto.",
+        scanned_warning:
+          "Tu PDF parece ser una imagen. El texto extraído puede estar incompleto.",
       },
       cv_builder: {
         title: "Crear CV",
         upload_first: "Sube tu CV primero",
         no_cvs: "Aún no hay CVs optimizados",
-        no_cvs_hint: "Ve a Empleos, selecciona una oferta y haz clic en \"Generar CV\"",
+        no_cvs_hint:
+          'Ve a Empleos, selecciona una oferta y haz clic en "Generar CV"',
         browse_jobs: "Ver Empleos",
         edit: "Editar",
         done: "Listo",
@@ -256,7 +270,8 @@ const resources = {
         generate_cv: "Generar CV",
         go_to_search: "Ir a Búsqueda",
         paste_a_jd: "Pegar una JD",
-        upload_cv_hint: "Sube tu CV primero para generar versiones optimizadas.",
+        upload_cv_hint:
+          "Sube tu CV primero para generar versiones optimizadas.",
         upload_cv_link: "Ir a Subir CV",
         status: {
           new: "Nuevo",
@@ -288,13 +303,15 @@ const resources = {
         view_original: "Ver original",
       },
       search_page: {
-        subtitle: "Define lo que buscas y deja que la IA encuentre empleos compatibles",
+        subtitle:
+          "Define lo que buscas y deja que la IA encuentre empleos compatibles",
         placeholder_titles: "ej. Senior Software Engineer",
         placeholder_tech: "ej. TypeScript, React, Node.js",
         placeholder_location: "ej. Barcelona, España o Remoto (EU)",
         placeholder_exclude: "ej. PHP, WordPress",
         placeholder_context: "Cualquier contexto adicional para la IA...",
-        configure_provider: "Configura tu proveedor de IA en Configuración antes de buscar.",
+        configure_provider:
+          "Configura tu proveedor de IA en Configuración antes de buscar.",
       },
       cv_upload: {
         subtitle: "Sube tu CV en formato PDF, DOCX o TXT",
@@ -319,7 +336,8 @@ const resources = {
       },
       settings_page: {
         subtitle: "Configura tu proveedor de IA para comenzar",
-        api_key_hint: "Tu clave API permanece en tu navegador y nunca se envía a nuestros servidores.",
+        api_key_hint:
+          "Tu clave API permanece en tu navegador y nunca se envía a nuestros servidores.",
         fetching: "Obteniendo...",
         loading_models: "Cargando modelos...",
         placeholder_model: "ej. gpt-4o",

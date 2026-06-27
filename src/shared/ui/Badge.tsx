@@ -15,13 +15,17 @@ const badgeVariants = {
   brand: "bg-brand-50 text-brand-600 border-brand-200/60",
 };
 
-export function Badge({ children, variant = "default", className }: BadgeProps) {
+export function Badge({
+  children,
+  variant = "default",
+  className,
+}: BadgeProps) {
   return (
     <span
       className={cn(
         "inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium tracking-wide",
         badgeVariants[variant],
-        className
+        className,
       )}
     >
       {children}

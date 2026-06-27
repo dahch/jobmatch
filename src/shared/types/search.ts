@@ -1,5 +1,10 @@
 export type Modality = "On-site" | "Remote" | "Hybrid" | "Any";
-export type Seniority = "Junior" | "Mid" | "Senior" | "Staff / Principal" | "Any";
+export type Seniority =
+  | "Junior"
+  | "Mid"
+  | "Senior"
+  | "Staff / Principal"
+  | "Any";
 
 export interface SearchProfile {
   job_titles: string[];

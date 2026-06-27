@@ -13,7 +13,10 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="space-y-1.5">
         {label && (
-          <label htmlFor={textareaId} className="block text-[13px] font-medium text-surface-600">
+          <label
+            htmlFor={textareaId}
+            className="block text-[13px] font-medium text-surface-600"
+          >
             {label}
           </label>
         )}
@@ -29,7 +32,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
               ? "border-red-300 focus:border-red-400 focus:ring-red-500/20"
               : "border-surface-200 hover:border-surface-300 focus:border-brand-400 focus:ring-brand-500/20",
             "disabled:bg-surface-50 disabled:text-surface-400 disabled:cursor-not-allowed",
-            className
+            className,
           )}
           {...props}
         />
@@ -37,6 +40,6 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {hint && !error && <p className="text-xs text-surface-400">{hint}</p>}
       </div>
     );
-  }
+  },
 );
 Textarea.displayName = "Textarea";
