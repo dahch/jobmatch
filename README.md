@@ -2,6 +2,8 @@
 
 > AI-powered job search and CV optimization tool. All client-side, no backend.
 
+**[Live Demo](https://jobmatch-ecru.vercel.app)**
+
 ## Overview
 
 JobMatch AI helps you find job offers and tailor your CV for each one using AI. It connects to your preferred AI provider (OpenAI, Anthropic, Gemini, OpenRouter, or any OpenAI-compatible endpoint), discovers matching jobs from major portals, parses your existing CV, and generates ATS-optimized PDF versions tailored to specific job descriptions.
@@ -44,8 +46,8 @@ JobMatch AI helps you find job offers and tailor your CV for each one using AI. 
 1. **Clone the repository**
 
    ```bash
-   git clone <repo-url>
-   cd job-match-ai
+   git clone https://github.com/dahch/jobmatch.git
+   cd jobmatch
    ```
 
 2. **Install dependencies**
