@@ -67,7 +67,7 @@ export function Layout({ children }: LayoutProps) {
       {/* Sidebar / Navigation Drawer */}
       <aside
         className={cn(
-          "w-60 flex flex-col bg-sidebar-bg border-r border-sidebar-border text-sidebar-text select-none",
+          "sidebar-menu-aside w-60 flex flex-col border-r border-sidebar-border text-sidebar-text select-none",
           "fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out md:static md:translate-x-0",
           isMobileOpen ? "translate-x-0" : "-translate-x-full",
         )}

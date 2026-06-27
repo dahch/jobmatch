@@ -145,6 +145,11 @@
 }
 
 @layer components {
+  .sidebar-menu-aside {
+    background-color: var(--color-sidebar-bg) !important;
+    opacity: 1 !important;
+  }
+
   .glass {
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
