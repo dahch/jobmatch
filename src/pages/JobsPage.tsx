@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Layout } from "@/shared/ui/Layout";
 import { Button, Badge, Modal } from "@/shared/ui";
 import { useJobsStore } from "@/features/job-search/model/store";
@@ -148,9 +148,9 @@ export function JobsPage() {
       {!parsedCV && jobs.length > 0 && (
         <div className="bg-amber-50 border border-amber-200/60 rounded-xl p-4 mb-4 text-sm text-amber-700">
           {t("jobs.upload_cv_hint")}{" "}
-          <a href="/cv/upload" className="underline font-medium text-amber-800">
+          <Link to="/cv/upload" className="underline font-medium text-amber-800">
             {t("jobs.upload_cv_link")}
-          </a>
+          </Link>
         </div>
       )}
 
