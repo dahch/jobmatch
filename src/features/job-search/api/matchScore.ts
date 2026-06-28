@@ -153,7 +153,8 @@ export function calculateMatchScore(cv: ParsedCV, job: JobOffer): MatchResult {
   };
 }
 
-function parseYear(dateStr: string): number {
+function parseYear(dateStr: string | undefined | null): number {
+  if (!dateStr || typeof dateStr !== "string") return 2020;
   const match = dateStr.match(/(\d{4})/);
   return match ? parseInt(match[1], 10) : 2020;
 }
