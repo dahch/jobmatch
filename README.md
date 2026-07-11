@@ -10,7 +10,7 @@ JobMatch AI helps you find job offers and tailor your CV for each one using AI. 
 
 **Key capabilities:**
 
-- Multi-provider AI configuration (OpenAI, Anthropic, Google Gemini, DeepSeek, OpenRouter, OpenCode, Custom)
+- Multi-provider AI configuration (OpenAI, Anthropic, Google Gemini, DeepSeek, NVIDIA NIM, OpenRouter, OpenCode, Custom)
 - AI-generated job discovery matching your search profile
 - CV parsing from PDF, DOCX, and TXT files
 - AI-generated CVs optimized for specific job offers (ATS-friendly)
@@ -25,15 +25,17 @@ JobMatch AI helps you find job offers and tailor your CV for each one using AI. 
 |---|---|
 | Framework | React 18 + TypeScript |
 | Build | Vite 5 |
-| Styling | Tailwind CSS v3 |
+| Styling | Tailwind CSS v3 (CSS custom properties for theming) |
 | State | Zustand |
 | Architecture | Feature-Sliced Design |
 | PDF Generation | @react-pdf/renderer |
 | CV Parsing | pdfjs-dist, mammoth |
-| i18n | react-i18next |
-| Routing | react-router-dom v6 |
-| Testing | Vitest + Testing Library |
-| Linting | ESLint, Prettier |
+| i18n | react-i18next (EN/ES) |
+| Routing | react-router-dom v6 (lazy-loaded with Suspense) |
+| Testing | Vitest + Testing Library + @vitest/coverage-v8 |
+| Linting | ESLint v9 (flat config), Prettier |
+| Theme | System-preference aware light/dark mode via CSS variables |
+| Deployment | Vercel (SPA rewrite rules) |
 
 ## Prerequisites
 
@@ -56,25 +58,13 @@ JobMatch AI helps you find job offers and tailor your CV for each one using AI. 
    pnpm install
    ```
 
-3. **Configure environment variables**
-
-   Copy the example env file and set your values:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-   | Variable | Type | Default | Description |
-   |---|---|---|---|
-   | `VITE_CORS_PROXY_URL` | `string` | `""` | (Planned) URL of a CORS proxy for job scraping requests |
-
-4. **Start the dev server**
+3. **Start the dev server**
 
    ```bash
    pnpm dev
    ```
 
-5. **Configure your AI provider**
+4. **Configure your AI provider**
 
    Open the app, go to Settings, and enter your API key. Your key is stored in localStorage and never leaves your browser.
 
@@ -103,15 +93,17 @@ src/
     CVUploadPage     # Upload and parse your existing CV
     CVBuilderPage    # Edit and export optimized CVs
     SettingsPage     # Configure AI provider
+    NotFoundPage     # 404 catch-all (lazy-loaded)
   features/         # Domain features (business logic + UI)
     ai-provider/     # Multi-provider AI abstraction layer
-    job-search/      # AI job discovery agent
+    job-search/      # AI job discovery agent + match scoring
     cv-parser/       # PDF/DOCX/TXT CV parsing
     cv-builder/      # CV optimization and PDF generation
   shared/           # Cross-cutting concerns
     lib/             # Utilities (AI JSON parsing, i18n, localStorage)
     types/           # Shared TypeScript types (AI, CV, Job, Search)
     ui/              # Design system (Button, Input, Badge, Modal, Layout, ...)
+api/                # Vercel serverless functions (proxy for CORS-restricted providers)
 ```
 
 Each feature follows FSD conventions:
@@ -131,6 +123,9 @@ features/<feature>/
 ┌──────────────────────────────────────────────────┐
 │                   UI Layer                        │
 │  Pages ──> Feature UI ──> Shared UI Components    │
+│  (Lazy-loaded with Suspense, wrapped in           │
+│   ErrorBoundary per route)                        │
+│  (Mobile: collapsible sidebar, responsive layout) │
 └──────────────┬───────────────────────────────────┘
                │
 ┌──────────────▼───────────────────────────────────┐
@@ -141,13 +136,16 @@ features/<feature>/
                │
 ┌──────────────▼───────────────────────────────────┐
 │              Shared Layer                         │
-│  Types │ Lib (aiJson, i18n, storage) │ UI kit     │
-└──────────────────────────────────────────────────┘
+│  Types │ Lib (aiJson, i18n, storage, utils)       │
+│  UI kit (Button, Input, Modal, Badge, Spinner,    │
+│          Layout, ErrorBoundary, Textarea)         │
+└──────────────┬───────────────────────────────────┘
                │
 ┌──────────────▼───────────────────────────────────┐
 │          External (browser-only)                  │
 │  AI APIs ◄──── AI Client abstraction             │
-│  Job portals ◄── Job Search Agent                 │
+│             (direct browser access for most,       │
+│              /api/proxy for CORS-restricted)      │
 │  localStorage ◄── All user data persistence       │
 └──────────────────────────────────────────────────┘
 ```
@@ -161,7 +159,7 @@ JobMatch AI runs entirely in the browser. There is no backend server.
 - **No analytics, no tracking, no telemetry.**
 - **No data persistence beyond your browser.** Clearing localStorage removes all data.
 
-If you need to access AI APIs that have CORS restrictions, you can configure a CORS proxy and use the `VITE_CORS_PROXY_URL` environment variable. Note that this feature is planned and not yet implemented.
+Some AI providers (e.g. NVIDIA NIM) don't allow direct browser CORS. For these, the app routes requests through a lightweight Vercel serverless proxy (`/api/proxy`). The proxy never logs or stores your API key or CV content.
 
 ## License
 

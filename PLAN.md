@@ -10,13 +10,13 @@ Build the provider settings page and the `aiClient.ts` module that normalizes re
 Implement the structured job search profile form and persist it to localStorage. This is needed before job search can work, and is a self-contained form + store feature with no external dependencies beyond Phase 2's types.
 
 ## Phase 4: CV Upload & Parsing
-Build file upload (react-dropzone), PDF parsing (pdfjs-dist), DOCX parsing (mammoth), and the AI-powered CV structuring step. This is a core input for the CV generation pipeline and must be ready before Phase 5.
+Build file upload (native HTML input + drag-and-drop), PDF parsing (pdfjs-dist), DOCX parsing (mammoth), and the AI-powered CV structuring step. This is a core input for the CV generation pipeline and must be ready before Phase 5.
 
 ## Phase 5: CV Optimizer + Builder + PDF Export
 Implement the prompt engineering for CV optimization, the CV editor UI, template selection (3 templates via @react-pdf/renderer), diff viewer, and PDF export. This is the primary user-facing deliverable and depends on Phases 2 and 4.
 
-## Phase 6: Job Search Agent + Job List UI
-Build the ReAct-style job search agent with tool use / fallback search, the job list (kanban-lite), job detail panel, and match scoring. This is the most complex feature and is deferred until the core CV pipeline works, since users can paste JDs manually in v1.0.
+## Phase 6: Job Search + Job List UI
+Build the AI-powered job search (single-shot prompt generating realistic listings), the job list UI, job detail panel, match scoring, and paste-JD workflow. This is the most complex feature and is deferred until the core CV pipeline works, since users can paste JDs manually in v1.0.
 
 ## Phase 7: i18n, Polish, Error Handling
 Wire up react-i18next for es/en, add streaming support, rate-limit retry logic, edge case handling (scanned PDFs, long CVs, portal blocks), and final UI polish. This is the cleanup pass that makes the app production-ready.
