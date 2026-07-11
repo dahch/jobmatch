@@ -70,6 +70,7 @@ Each page owns its full UI composition. Pages are the "screaming architecture" e
 | `CVUploadPage` | Drag-and-drop file upload; delegates parsing to `cvParser`; shows parsed preview |
 | `CVBuilderPage` | CV editor, template selector (3 templates), PDF preview via `@react-pdf/renderer`, PDF download |
 | `SettingsPage` | Provider selector, API key input, model selector with live fetching, connection test |
+| `NotFoundPage` | 404 catch-all route with i18n support, link back to home |
 
 ### 2.3 Features Layer (`src/features/`)
 
@@ -152,6 +153,10 @@ Inline resource bundles (no external JSON files). English and Spanish translatio
 #### ui/
 
 Design system components: `Button`, `Input`, `Textarea`, `Badge`, `Spinner`, `Modal`, `Layout`, `ErrorBoundary`. All use Tailwind CSS with the project's custom color tokens (brand, surface, sidebar).
+
+**SEO**: Per-route meta tags, Open Graph, Twitter Cards, canonical URLs, hreflang for i18n. Uses `react-helmet-async`. `SEO` component resolves config from `seo-config.ts` by route key. `StructuredData` component renders JSON-LD schemas (SoftwareApplication, Organization, WebSite, FAQPage).
+
+**StructuredData**: Renders JSON-LD structured data for SEO. Includes app metadata, organization info, website schema with SearchAction, and FAQ schema.
 
 **Modal**: Includes Escape key handling, focus trap (Tab cycling), auto-focus on first focusable element, `aria-modal` and `role="dialog"` for screen readers.
 
@@ -282,6 +287,7 @@ Light/dark mode uses CSS custom properties defined in `index.html` with `prefers
 | `clsx` + `tailwind-merge` | Utility for conditional class names without conflicts. |
 | `react-i18next` | i18n with inline resource bundles (no external files). |
 | `react-router-dom` v6 | Client-side routing with lazy loading support. |
+| `react-helmet-async` | Per-route `<head>` management for SEO meta tags and structured data. |
 
 ---
 
@@ -292,7 +298,8 @@ Light/dark mode uses CSS custom properties defined in `index.html` with `prefers
 - **Serverless**: `api/proxy.ts` handles CORS-restricted provider requests
 - **Build**: `tsc -b && vite build` (type-check + production build)
 - **No backend**: All data persistence is client-side (`localStorage`)
+- **SEO**: `robots.txt` and `sitemap.xml` in `public/`. Per-route meta tags via `react-helmet-async`. JSON-LD structured data (SoftwareApplication, Organization, WebSite, FAQPage) injected via `<Helmet>`.
 
 ---
 
-*Design document for JobMatch AI — v1.0.0*
+*Design document for JobMatch AI — v1.0.1*

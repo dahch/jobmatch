@@ -18,6 +18,7 @@ JobMatch AI helps you find job offers and tailor your CV for each one using AI. 
 - Match score calculation between your CV and job requirements
 - Bilingual UI (English and Spanish)
 - Paste any job description to generate a tailored CV on the spot
+- SEO: per-route meta tags, Open Graph, Twitter Cards, structured data (JSON-LD), `robots.txt`, `sitemap.xml`
 
 ## Tech Stack
 
@@ -32,6 +33,7 @@ JobMatch AI helps you find job offers and tailor your CV for each one using AI. 
 | CV Parsing | pdfjs-dist, mammoth |
 | i18n | react-i18next (EN/ES) |
 | Routing | react-router-dom v6 (lazy-loaded with Suspense) |
+| SEO | react-helmet-async (per-route meta, structured data) |
 | Testing | Vitest + Testing Library + @vitest/coverage-v8 |
 | Linting | ESLint v9 (flat config), Prettier |
 | Theme | System-preference aware light/dark mode via CSS variables |

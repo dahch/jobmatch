@@ -124,4 +124,28 @@
 
 ---
 
-*Architecture Decision Records for JobMatch AI — v1.0.0*
+## ADR-011: 404 Catch-All Route with i18n
+
+- **Date**: 2025-07-11 (commit `3091507`)
+- **Status**: Accepted
+- **Context**: Hard-refreshing on client-side routes or navigating to undefined paths returned a blank page or Vercel's default 404.
+- **Decision**: Add a `*` catch-all route in `router.tsx` pointing to `NotFoundPage`. The page uses i18n translations for the error message, renders inside the `Layout` component, and includes an SEO `<noindex>` tag.
+- **Consequences**:
+  - Pros: Consistent UX for invalid routes, i18n support, no SEO leakage of error pages.
+  - Cons: Minor bundle addition (lazy-loaded).
+
+---
+
+## ADR-012: SEO via react-helmet-async + Static Files
+
+- **Date**: 2025-07-11 (commits `11234aa`, `b92f68b`)
+- **Status**: Accepted
+- **Context**: The SPA had no SEO presence — no meta tags, no structured data, no sitemap. Search engines couldn't index routes, and social sharing showed generic or missing previews.
+- **Decision**: Use `react-helmet-async` for per-route `<head>` management. Centralize SEO config in `seo-config.ts` with route keys. Add static `robots.txt` and `sitemap.xml` in `public/`. Render JSON-LD structured data (SoftwareApplication, Organization, WebSite, FAQPage) via a dedicated `StructuredData` component. Wrap the app in `HelmetProvider`.
+- **Consequences**:
+  - Pros: Per-route meta tags without complex SSR, structured data for rich search results, social sharing previews, i18n-aware hreflang.
+  - Cons: Client-side rendering means crawlers that don't execute JS won't see meta tags (acceptable for Vercel-deployed SPA), sitemap is static (must be updated manually when routes change).
+
+---
+
+*Architecture Decision Records for JobMatch AI — v1.0.1*
