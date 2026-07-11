@@ -1,11 +1,15 @@
-export type Provider =
-  | "openai"
-  | "openrouter"
-  | "anthropic"
-  | "gemini"
-  | "deepseek"
-  | "opencode"
-  | "custom";
+export const PROVIDERS = {
+  openai: "openai",
+  openrouter: "openrouter",
+  anthropic: "anthropic",
+  gemini: "gemini",
+  deepseek: "deepseek",
+  nvidia: "nvidia",
+  opencode: "opencode",
+  custom: "custom",
+} as const;
+
+export type Provider = (typeof PROVIDERS)[keyof typeof PROVIDERS];
 
 export interface AIClientConfig {
   provider: Provider;
@@ -56,11 +60,22 @@ export const PROVIDER_MODELS: Record<Provider, string[]> = {
     "gemini-1.5-pro",
   ],
   deepseek: ["deepseek-chat", "deepseek-reasoner"],
+  nvidia: [
+    "meta/llama-3.1-70b-instruct",
+    "meta/llama-3.1-8b-instruct",
+    "mistralai/mixtral-8x7b-instruct",
+    "google/gemma-2-9b-it",
+    "microsoft/phi-3-medium-4k-instruct",
+  ],
   opencode: [],
   custom: [],
 };
 
-export const PROVIDER_BASE_URLS: Record<Exclude<Provider, "custom" | "deepseek">, string> = {
+// nvidia excluded: uses hardcoded URL in aiClient.ts (CORS-restricted, routes through proxy)
+export const PROVIDER_BASE_URLS: Record<
+  Exclude<Provider, "custom" | "deepseek" | "nvidia">,
+  string
+> = {
   openai: "https://api.openai.com/v1",
   openrouter: "https://openrouter.ai/api/v1",
   anthropic: "https://api.anthropic.com/v1",

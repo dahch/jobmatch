@@ -5,6 +5,7 @@ import type {
   AIResponse,
   Provider,
 } from "@/shared/types";
+import { PROVIDERS } from "@/shared/types";
 
 interface ModelInfo {
   id: string;
@@ -17,6 +18,9 @@ interface AnthropicMessage {
 
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 1000;
+
+// Providers that don't allow browser CORS — route through /api/proxy
+const PROXIED_PROVIDERS: Set<Provider> = new Set([PROVIDERS.nvidia]);
 
 async function fetchWithRetry(
   url: string,
@@ -35,6 +39,37 @@ async function fetchWithRetry(
   return res;
 }
 
+async function proxyFetch(
+  url: string,
+  init: RequestInit,
+): Promise<Response> {
+  const rawBody = init.body;
+  const parsedBody =
+    typeof rawBody === "string" ? JSON.parse(rawBody) : rawBody;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    return await fetchWithRetry(
+      "/api/proxy",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetUrl: url,
+          headers: init.headers,
+          body: parsedBody,
+        }),
+        signal: controller.signal,
+      },
+      MAX_RETRIES,
+    );
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 // ── Shared OpenAI-compatible completion ──────────────────────────────
 
 interface ProviderEndpoint {
@@ -45,13 +80,13 @@ interface ProviderEndpoint {
 
 function getEndpoint(provider: Provider, baseUrl?: string): ProviderEndpoint {
   switch (provider) {
-    case "openai":
+    case PROVIDERS.openai:
       return {
         url: "https://api.openai.com/v1/chat/completions",
         headers: {},
         errorLabel: "OpenAI",
       };
-    case "openrouter":
+    case PROVIDERS.openrouter:
       return {
         url: "https://openrouter.ai/api/v1/chat/completions",
         headers: {
@@ -60,20 +95,26 @@ function getEndpoint(provider: Provider, baseUrl?: string): ProviderEndpoint {
         },
         errorLabel: "OpenRouter",
       };
-    case "deepseek":
+    case PROVIDERS.deepseek:
       return {
         url: "https://api.deepseek.com/v1/chat/completions",
         headers: {},
         errorLabel: "DeepSeek",
       };
-    case "opencode":
+    case PROVIDERS.nvidia:
+      return {
+        url: "https://integrate.api.nvidia.com/v1/chat/completions",
+        headers: {},
+        errorLabel: "NVIDIA NIM",
+      };
+    case PROVIDERS.opencode:
       if (!baseUrl) throw new Error("OpenCode provider requires a base URL");
       return {
         url: `${baseUrl}/chat/completions`,
         headers: {},
         errorLabel: "OpenCode",
       };
-    case "custom":
+    case PROVIDERS.custom:
       if (!baseUrl) throw new Error("Custom provider requires a base URL");
       return {
         url: `${baseUrl}/chat/completions`,
@@ -107,15 +148,25 @@ async function openAICompatibleCompletion(
     body.tools = options.tools.map((t) => ({ type: "function", function: t }));
   if (options?.response_format) body.response_format = options.response_format;
 
-  const res = await fetchWithRetry(endpoint.url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.apiKey}`,
-      ...endpoint.headers,
-    },
-    body: JSON.stringify(body),
-  });
+  const res = PROXIED_PROVIDERS.has(config.provider)
+    ? await proxyFetch(endpoint.url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${config.apiKey}`,
+          ...endpoint.headers,
+        },
+        body: JSON.stringify(body),
+      })
+    : await fetchWithRetry(endpoint.url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${config.apiKey}`,
+          ...endpoint.headers,
+        },
+        body: JSON.stringify(body),
+      });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -259,15 +310,16 @@ export async function chatCompletion(
   },
 ): Promise<AIResponse> {
   switch (config.provider) {
-    case "openai":
-    case "openrouter":
-    case "deepseek":
-    case "opencode":
-    case "custom":
+    case PROVIDERS.openai:
+    case PROVIDERS.openrouter:
+    case PROVIDERS.deepseek:
+    case PROVIDERS.nvidia:
+    case PROVIDERS.opencode:
+    case PROVIDERS.custom:
       return openAICompatibleCompletion(config, messages, options);
-    case "anthropic":
+    case PROVIDERS.anthropic:
       return anthropicCompletion(config, messages, options);
-    case "gemini":
+    case PROVIDERS.gemini:
       return geminiCompletion(config, messages, options);
     default:
       throw new Error(`Unknown provider: ${config.provider}`);
@@ -311,14 +363,14 @@ export async function listModels(
 ): Promise<string[]> {
   try {
     switch (provider) {
-      case "openai":
+      case PROVIDERS.openai:
         if (signal?.aborted) return [];
         return listOpenAICompatibleModels(
           "https://api.openai.com/v1/models",
           { Authorization: `Bearer ${apiKey}` },
           (id) => id.includes("gpt") || id.includes("o1") || id.includes("o3"),
         );
-      case "openrouter":
+      case PROVIDERS.openrouter:
         if (signal?.aborted) return [];
         return listOpenAICompatibleModels(
           "https://openrouter.ai/api/v1/models",
@@ -327,7 +379,7 @@ export async function listModels(
             "HTTP-Referer": window.location.origin,
           },
         );
-      case "anthropic": {
+      case PROVIDERS.anthropic: {
         // Anthropic has no public model listing endpoint
         // Return known Claude models statically
         return [
@@ -336,18 +388,24 @@ export async function listModels(
           "claude-3-opus-20240229",
         ];
       }
-      case "gemini":
+      case PROVIDERS.gemini:
         if (signal?.aborted) return [];
         return listGeminiModels(apiKey);
-      case "deepseek":
+      case PROVIDERS.deepseek:
         if (signal?.aborted) return [];
         return listOpenAICompatibleModels(
           "https://api.deepseek.com/v1/models",
           { Authorization: `Bearer ${apiKey}` },
           (id) => id.includes("deepseek"),
         );
-      case "opencode":
-      case "custom":
+      case PROVIDERS.nvidia:
+        if (signal?.aborted) return [];
+        return listOpenAICompatibleModels(
+          "https://integrate.api.nvidia.com/v1/models",
+          { Authorization: `Bearer ${apiKey}` },
+        );
+      case PROVIDERS.opencode:
+      case PROVIDERS.custom:
         if (signal?.aborted) return [];
         if (!baseUrl) return [];
         return listOpenAICompatibleModels(`${baseUrl}/models`, {
