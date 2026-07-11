@@ -37,7 +37,10 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { targetUrl, headers, body } = req.body as {
+  // Vercel may deliver req.body as a raw string instead of a parsed object
+  const raw: unknown = req.body;
+  const payload = typeof raw === "string" ? JSON.parse(raw) : raw;
+  const { targetUrl, headers, body } = payload as {
     targetUrl?: string;
     headers?: Record<string, string>;
     body?: unknown;
@@ -47,9 +50,13 @@ export default async function handler(
     return res.status(400).json({ error: "Missing targetUrl" });
   }
 
+  if (!body || typeof body !== "object") {
+    return res.status(400).json({ error: "Missing or invalid body" });
+  }
+
   try {
-    const parsed = new URL(targetUrl);
-    if (!ALLOWED_HOSTS.includes(parsed.hostname)) {
+    const parsedUrl = new URL(targetUrl);
+    if (!ALLOWED_HOSTS.includes(parsedUrl.hostname)) {
       return res.status(403).json({ error: "Host not allowed" });
     }
   } catch {
