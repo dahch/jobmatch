@@ -356,16 +356,16 @@ export function CVBuilderPage() {
             <CVDiffViewer original={parsedCV} optimized={displayCV} />
           )}
 
-          <div className={`card overflow-hidden ${showPreview && !editing ? "" : "hidden"}`}>
-            <div className="px-4 py-2.5 bg-surface-50 border-b border-surface-100 text-xs text-surface-400 text-center font-medium">
-              {t("cv_builder.pdf_preview")}
-            </div>
-            {templateElement && (
+          {showPreview && !editing && templateElement && (
+            <div className="card overflow-hidden">
+              <div className="px-4 py-2.5 bg-surface-50 border-b border-surface-100 text-xs text-surface-400 text-center font-medium">
+                {t("cv_builder.pdf_preview")}
+              </div>
               <PDFViewer key={template} width="100%" height={800} showToolbar={false}>
                 {templateElement}
               </PDFViewer>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       ) : null}
     </Layout>
