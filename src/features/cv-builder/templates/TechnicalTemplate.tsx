@@ -18,7 +18,10 @@ const styles = StyleSheet.create({
     fontFamily: "Courier-Bold",
     backgroundColor: "#111",
     color: "#fff",
-    padding: "3 6",
+    paddingTop: 3,
+    paddingBottom: 3,
+    paddingLeft: 6,
+    paddingRight: 6,
     marginBottom: 6,
   },
   jobRow: {
@@ -34,7 +37,10 @@ const styles = StyleSheet.create({
   skillTag: {
     fontSize: 7,
     backgroundColor: "#e5e7eb",
-    padding: "2 5",
+    paddingTop: 2,
+    paddingBottom: 2,
+    paddingLeft: 5,
+    paddingRight: 5,
     borderRadius: 2,
     marginRight: 4,
     marginBottom: 4,
