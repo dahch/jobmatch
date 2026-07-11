@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -79,16 +79,17 @@ export function CVBuilderPage() {
     }
   };
 
-  const renderTemplate = (cv: OptimizedCV) => {
+  const templateElement = useMemo(() => {
+    if (!displayCV) return null;
     switch (template) {
       case "professional":
-        return <ProfessionalTemplate cv={cv} accentColor={accentColor} />;
+        return <ProfessionalTemplate cv={displayCV} accentColor={accentColor} />;
       case "technical":
-        return <TechnicalTemplate cv={cv} />;
+        return <TechnicalTemplate cv={displayCV} />;
       default:
-        return <MinimalTemplate cv={cv} />;
+        return <MinimalTemplate cv={displayCV} />;
     }
-  };
+  }, [displayCV, template, accentColor]);
 
   if (!parsedCV) {
     return (
@@ -359,9 +360,11 @@ export function CVBuilderPage() {
             <div className="px-4 py-2.5 bg-surface-50 border-b border-surface-100 text-xs text-surface-400 text-center font-medium">
               {t("cv_builder.pdf_preview")}
             </div>
-            <PDFViewer width="100%" height={800} showToolbar={false}>
-              {renderTemplate(displayCV)}
-            </PDFViewer>
+            {templateElement && (
+              <PDFViewer key={template} width="100%" height={800} showToolbar={false}>
+                {templateElement}
+              </PDFViewer>
+            )}
           </div>
         </div>
       ) : null}
