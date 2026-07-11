@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, Link } from "react-router-dom";
 import { Layout } from "@/shared/ui/Layout";
+import { SEO } from "@/shared/ui/SEO";
 import { Button, Badge, Modal } from "@/shared/ui";
 import { useJobsStore } from "@/features/job-search/model/store";
 import { useCVStore } from "@/features/cv-builder/model/store";
@@ -88,6 +89,7 @@ export function JobsPage() {
 
   return (
     <Layout>
+      <SEO route="/jobs" />
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-1">

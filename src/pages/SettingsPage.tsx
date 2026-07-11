@@ -9,20 +9,22 @@ import {
   Zap,
 } from "lucide-react";
 import { Layout } from "@/shared/ui/Layout";
+import { SEO } from "@/shared/ui/SEO";
 import { Button, Input } from "@/shared/ui";
 import { useAIProviderStore } from "@/features/ai-provider/model/store";
-import { PROVIDER_MODELS } from "@/shared/types";
+import { PROVIDER_MODELS, PROVIDERS } from "@/shared/types";
 import { listModels } from "@/shared/api/aiClient";
 import type { Provider } from "@/shared/types";
 
 const providers: { value: Provider; label: string }[] = [
-  { value: "openai", label: "OpenAI" },
-  { value: "openrouter", label: "OpenRouter" },
-  { value: "anthropic", label: "Anthropic" },
-  { value: "gemini", label: "Google Gemini" },
-  { value: "deepseek", label: "DeepSeek" },
-  { value: "opencode", label: "OpenCode" },
-  { value: "custom", label: "Custom (OpenAI-compatible)" },
+  { value: PROVIDERS.openai, label: "OpenAI" },
+  { value: PROVIDERS.openrouter, label: "OpenRouter" },
+  { value: PROVIDERS.anthropic, label: "Anthropic" },
+  { value: PROVIDERS.gemini, label: "Google Gemini" },
+  { value: PROVIDERS.deepseek, label: "DeepSeek" },
+  { value: PROVIDERS.nvidia, label: "NVIDIA NIM" },
+  { value: PROVIDERS.opencode, label: "OpenCode" },
+  { value: PROVIDERS.custom, label: "Custom (OpenAI-compatible)" },
 ];
 
 export function SettingsPage() {
@@ -59,7 +61,7 @@ export function SettingsPage() {
     const models = await listModels(
       provider,
       apiKey,
-      provider === "custom" || provider === "opencode" ? baseUrl : undefined,
+      provider === PROVIDERS.custom || provider === PROVIDERS.opencode ? baseUrl : undefined,
       signal,
     );
     if (signal?.aborted) return;
@@ -129,7 +131,7 @@ export function SettingsPage() {
       apiKey,
       model,
       baseUrl:
-        provider === "custom" || provider === "opencode" ? baseUrl : undefined,
+        provider === PROVIDERS.custom || provider === PROVIDERS.opencode ? baseUrl : undefined,
     });
   };
 
@@ -142,6 +144,7 @@ export function SettingsPage() {
 
   return (
     <Layout>
+      <SEO route="/settings" />
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-9 h-9 rounded-xl bg-surface-100 flex items-center justify-center">
@@ -193,7 +196,7 @@ export function SettingsPage() {
           hint={t("settings_page.api_key_hint")}
         />
 
-        {(provider === "custom" || provider === "opencode") && (
+        {(provider === PROVIDERS.custom || provider === PROVIDERS.opencode) && (
           <Input
             label={t("settings.base_url")}
             value={baseUrl}

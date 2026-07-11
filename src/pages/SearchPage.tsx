@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Search, Plus, X, Loader2, ChevronDown } from "lucide-react";
 import { Layout } from "@/shared/ui/Layout";
+import { SEO } from "@/shared/ui/SEO";
 import { Button, Input, Textarea } from "@/shared/ui";
 import { useJobSearchStore } from "@/features/job-search/model/profileStore";
 import { useJobsStore } from "@/features/job-search/model/store";
@@ -99,6 +100,7 @@ export function SearchPage() {
 
   return (
     <Layout>
+      <SEO route="/search" />
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-9 h-9 rounded-xl bg-surface-100 flex items-center justify-center">

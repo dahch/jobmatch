@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Upload, FileText, CheckCircle, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/shared/ui/Layout";
+import { SEO } from "@/shared/ui/SEO";
 import { Button } from "@/shared/ui";
 import { useCVStore } from "@/features/cv-builder/model/store";
 import { useAIProviderStore } from "@/features/ai-provider/model/store";
@@ -52,6 +53,7 @@ export function CVUploadPage() {
 
   return (
     <Layout>
+      <SEO route="/cv/upload" />
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-9 h-9 rounded-xl bg-surface-100 flex items-center justify-center">

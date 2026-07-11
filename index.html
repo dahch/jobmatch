@@ -3,12 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#6366f1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' data: https:; worker-src 'self' blob:; img-src 'self' data:; frame-src 'self' blob:; child-src 'self' blob:;" />
+
+    <!-- SEO: Primary meta tags (overridden per-route by react-helmet-async) -->
+    <title>JobMatch AI — AI Job Search &amp; CV Optimization</title>
+    <meta name="description" content="AI-powered job search and CV optimization tool. Find matching jobs and generate ATS-optimized CVs tailored to each offer. All client-side, your data never leaves your browser." />
+    <meta name="robots" content="index, follow, max-snippet:160, max-image-preview:large" />
+    <link rel="canonical" href="https://jobmatch-ecru.vercel.app/" />
+
+    <!-- SEO: Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="JobMatch AI — AI Job Search & CV Optimization" />
+    <meta property="og:description" content="AI-powered job search and CV optimization tool. Find matching jobs and generate ATS-optimized CVs tailored to each offer." />
+    <meta property="og:url" content="https://jobmatch-ecru.vercel.app/" />
+    <meta property="og:site_name" content="JobMatch AI" />
+    <meta property="og:image" content="https://jobmatch-ecru.vercel.app/og-default.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- SEO: Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JobMatch AI — AI Job Search & CV Optimization" />
+    <meta name="twitter:description" content="AI-powered job search and CV optimization tool. Find matching jobs and generate ATS-optimized CVs tailored to each offer." />
+    <meta name="twitter:image" content="https://jobmatch-ecru.vercel.app/og-default.png" />
+
+    <!-- SEO: Hreflang for i18n (default en, es alternate) -->
+    <link rel="alternate" hreflang="en" href="https://jobmatch-ecru.vercel.app/" />
+    <link rel="alternate" hreflang="es" href="https://jobmatch-ecru.vercel.app/es/" />
+    <link rel="alternate" hreflang="x-default" href="https://jobmatch-ecru.vercel.app/" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <title>JobMatch AI</title>
   </head>
   <body class="bg-surface-50 text-surface-800 antialiased font-sans">
     <div id="root"></div>

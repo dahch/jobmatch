@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { Layout } from "@/shared/ui/Layout";
+import { SEO } from "@/shared/ui/SEO";
 import { useCVStore } from "@/features/cv-builder/model/store";
 import { useJobsStore } from "@/features/job-search/model/store";
 import { CVDiffViewer } from "@/features/cv-builder/ui/CVDiffViewer";
@@ -92,6 +93,7 @@ export function CVBuilderPage() {
   if (!parsedCV) {
     return (
       <Layout>
+        <SEO route="/cv/builder" />
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-1">
             <div className="w-9 h-9 rounded-xl bg-surface-100 flex items-center justify-center">
@@ -122,6 +124,7 @@ export function CVBuilderPage() {
 
   return (
     <Layout>
+      <SEO route="/cv/builder" />
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-1">
