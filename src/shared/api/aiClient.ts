@@ -399,11 +399,8 @@ export async function listModels(
           (id) => id.includes("deepseek"),
         );
       case PROVIDERS.nvidia:
-        if (signal?.aborted) return [];
-        return listOpenAICompatibleModels(
-          "https://integrate.api.nvidia.com/v1/models",
-          { Authorization: `Bearer ${apiKey}` },
-        );
+        // NVIDIA NIM /v1/models doesn't support CORS — use static list only
+        return [];
       case PROVIDERS.opencode:
       case PROVIDERS.custom:
         if (signal?.aborted) return [];
