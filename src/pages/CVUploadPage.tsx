@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Upload, FileText, CheckCircle, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,7 @@ export function CVUploadPage() {
   const config = useAIProviderStore((s) => s.config);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File) => {
     if (!config) {
@@ -87,6 +88,7 @@ export function CVUploadPage() {
           onChange={handleChange}
           className="hidden"
           id="cv-upload"
+          ref={fileInputRef}
         />
         <label htmlFor="cv-upload" className="cursor-pointer">
           {isParsingCV ? (
@@ -122,6 +124,7 @@ export function CVUploadPage() {
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
+                    fileInputRef.current?.click();
                   }}
                 >
                   {t("cv_upload.upload_different")}
