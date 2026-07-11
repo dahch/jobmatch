@@ -8,6 +8,7 @@ const SearchPage = lazy(() => import("@/pages/SearchPage").then(m => ({ default:
 const JobsPage = lazy(() => import("@/pages/JobsPage").then(m => ({ default: m.JobsPage })));
 const CVUploadPage = lazy(() => import("@/pages/CVUploadPage").then(m => ({ default: m.CVUploadPage })));
 const CVBuilderPage = lazy(() => import("@/pages/CVBuilderPage").then(m => ({ default: m.CVBuilderPage })));
+const NotFoundPage = lazy(() => import("@/pages/NotFoundPage").then(m => ({ default: m.NotFoundPage })));
 
 function LazyPage({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh]"><Spinner /></div>}>{children}</Suspense>;
@@ -59,6 +60,14 @@ export const router = createBrowserRouter([
     element: (
       <ErrorBoundary>
         <LazyPage><CVBuilderPage /></LazyPage>
+      </ErrorBoundary>
+    ),
+  },
+  {
+    path: "*",
+    element: (
+      <ErrorBoundary>
+        <LazyPage><NotFoundPage /></LazyPage>
       </ErrorBoundary>
     ),
   },

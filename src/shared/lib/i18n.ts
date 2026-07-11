@@ -168,6 +168,10 @@ const resources = {
         loading_models: "Loading models...",
         placeholder_model: "e.g. gpt-4o",
       },
+      not_found: {
+        message: "The page you're looking for doesn't exist or has been moved.",
+        go_home: "Back to Home",
+      },
     },
   },
   es: {
@@ -341,6 +345,11 @@ const resources = {
         fetching: "Obteniendo...",
         loading_models: "Cargando modelos...",
         placeholder_model: "ej. gpt-4o",
+      },
+      not_found: {
+        message:
+          "La página que buscas no existe o ha sido movida.",
+        go_home: "Volver al Inicio",
       },
     },
   },
