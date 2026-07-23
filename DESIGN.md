@@ -24,15 +24,21 @@ graph TD
 
     subgraph "Shared Layer"
         APS --> AC[aiClient]
-        JS --> AC
         CP --> AC
         OPT --> AC
         AC --> API[AI Provider APIs]
         JS --> JA[jobSearchAgent]
-        JA --> AC
+        JA --> ADAPT[Source Adapters]
     end
 
-    subgraph "External"
+    subgraph "Job Sources"
+        ADAPT -->|Via Proxy| SP[SerpApi<br/>(Google Jobs)]
+        SP --> PROXY[/api/proxy<br/>Vercel Serverless]
+        PROXY --> SP
+        ADAPT -->|Direct<br/>(DACH only)| AW[Arbeitnow API]
+    end
+
+    subgraph "External AI"
         API -->|OpenAI| OAI[api.openai.com]
         API -->|Anthropic| ANT[api.anthropic.com]
         API -->|Gemini| GEM[generativelanguage.googleapis.com]
@@ -81,8 +87,11 @@ Each page owns its full UI composition. Pages are the "screaming architecture" e
 #### job-search
 
 - **model/profileStore.ts**: Zustand store for `SearchProfile`. Persisted to `jobmatch-search-profile`.
-- **model/store.ts**: Zustand store for `JobOffer[]` + search state (`isSearching`, `searchProgress`, `searchError`). Dynamically imports `profileStore` to get current profile. Persisted to `jobmatch-jobs`.
-- **api/jobSearchAgent.ts**: Single-shot prompt-based job search. Builds structured prompt from profile, sends to AI, parses JSON response with `parseAIJsonResponse` (handles truncated/malformed responses).
+- **model/store.ts**: Zustand store for `JobOffer[]` + search state (`isSearching`, `searchProgress`, `searchError`). Dynamically imports `profileStore` to get current profile. Persisted to `jobmatch-jobs`. `searchJobs()` no longer requires an AI config — sources run independently.
+- **api/jobSearchAgent.ts**: Multi-source job fetcher. Calls all applicable source adapters in parallel (`Promise.allSettled` — one failure doesn't kill the search), reports warnings per source via `onWarn` callback. Sources selected dynamically based on profile location and available API keys: SerpApi runs unconditionally (fails gracefully without a key), Arbeitnow only for DACH (Germany/Austria/Switzerland) or EU-remote locations. Supports `AbortSignal` for cancellation. No AI dependency; works without any provider configured.
+- **api/dedupeJobs.ts**: Merges and deduplicates results from multiple sources by `title+company+location` composite key. Entries with all three fields missing are passed through (cannot deduplicate).
+- **api/sources/serpapi.ts**: Primary source adapter — proxied through `/api/proxy` (SerpApi has zero CORS support). Uses Google Jobs engine. API key is user-supplied (BYOK, stored in localStorage) and forwarded per-request. Maps SerpApi's `jobs_results[]` to `JobOffer`, including optional fields (`apply_options`, `salary`, `benefits`, `schedule_type`, `via`). Fails gracefully on missing/invalid key (returns `[]`). Free tier: 250 searches/month.
+- **api/sources/arbeitnow.ts**: Conditional secondary source — direct browser fetch (CORS-enabled, free, no auth). Only included when profile targets DACH or EU-remote, because the API's actual job base is concentrated in Germany. The API's `tags[]` and `search`/`location` filtering is confirmed broken (returns unfiltered results); the adapter fetches an unfiltered page and delegates ranking client-side. Maps Arbeitnow's response fields to `JobOffer`.
 - **api/matchScore.ts**: Deterministic match scoring — no AI involved. Computes weighted score from skills match (30%), tech match (35%), experience level (20%), seniority (15%).
 - **api/parseJD.ts**: Parses pasted job description text via AI into a `JobOffer` object.
 - **ui/JobDetailPanel.tsx**: Slide-in panel showing full JD, match breakdown, extracted requirements, and "Generate CV" button.
@@ -97,8 +106,9 @@ Each page owns its full UI composition. Pages are the "screaming architecture" e
 - **lib/cvOptimizer.ts**: Builds optimization prompt, sends to AI, normalizes response into `OptimizedCV`. Enforces honesty rules (no invented experience, no modified dates).
 - **lib/pdfExporter.tsx**: Uses `@react-pdf/renderer`'s `pdf()` to generate blobs. Delegates to template components.
 - **ui/CVEditor.tsx**: Inline editor for OptimizedCV fields.
-- **ui/CVDiffViewer.tsx**: Uses `react-diff-viewer-continued` to show changes between original and optimized CV.
-- **templates/**: Three `@react-pdf/renderer` templates — `MinimalTemplate`, `ProfessionalTemplate` (two-column with accent color), `TechnicalTemplate` (compact).
+- **ui/CVDiffViewer.tsx**: Custom diff viewer (not `react-diff-viewer-continued`) showing changes between original and optimized CV, with expandable summary of changes and ATS keywords.
+- **templates/**: Three `@react-pdf/renderer` templates — `MinimalTemplate`, `ProfessionalTemplate` (two-column with accent color), `TechnicalTemplate` (compact monospace, uses individual padding properties).
+- **CVBuilderPage.tsx**: Template element is rendered inside a `useMemo` keyed on `[displayCV, template, accentColor]` to avoid unnecessary re-renders. `PDFViewer` is conditionally rendered only when the user clicks "Preview" and is destroyed on close via conditional mount — prevents wasted PDF computation.
 
 ### 2.4 Shared Layer (`src/shared/`)
 
@@ -177,19 +187,27 @@ sequenceDiagram
     participant PS as profileStore
     participant JS as jobsStore
     participant JA as jobSearchAgent
-    participant AC as aiClient
-    participant AI as AI Provider
+    participant SPAPI as SerpApi (Proxied)
+    participant PX as /api/proxy
+    participant AW as Arbeitnow (Direct, DACH only)
 
     U->>SP: Click "Search Jobs"
     SP->>PS: setProfile(form)
-    SP->>JS: searchJobs(config)
+    SP->>JS: searchJobs()
     JS->>PS: getProfile()
-    JS->>JA: searchJobs(config, profile, onProgress)
-    JA->>AC: chatCompletion(config, messages, options)
-    AC->>AI: POST /chat/completions
-    AI-->>AC: JSON response
-    AC-->>JA: { content, tool_calls? }
-    JA->>JA: parseAIJsonResponse(content)
+    JS->>JA: searchJobs(profile, onProgress)
+    JA->>JA: Select sources (SerpApi always, Arbeitnow if DACH)
+    JA->>JA: Promise.allSettled(sources)
+    par Primary (proxied)
+        JA->>PX: POST /api/proxy { source: "serpapi", params: { q, location, api_key } }
+        PX->>SPAPI: GET serpapi.com/search?engine=google_jobs...
+        SPAPI-->>PX: Results
+        PX-->>JA: JobOffer[]
+    and Secondary (DACH only)
+        JA->>AW: GET arbeitnow.com/api/job-board-api
+        AW-->>JA: JobOffer[]
+    end
+    JA->>JA: Merge + deduplicate (title+company+location)
     JA-->>JS: JobOffer[]
     JS->>JS: setStorageItem(STORAGE_KEY, jobs)
     JS-->>SP: navigate("/jobs")
@@ -268,6 +286,10 @@ Match scoring is intentionally deterministic (no AI call). It compares CV skills
 
 NVIDIA NIM doesn't support browser CORS. Rather than blocking the provider, requests route through a Vercel serverless function (`/api/proxy`) that forwards the request with appropriate headers. The proxy is stateless — it doesn't log or store any request data.
 
+The proxy was extended in ADR-013 to also serve job sources that require a hidden API key or lack CORS. SerpApi (Google Jobs) is the primary proxied job source — it has zero CORS support, so every search round-trips through the proxy. The SerpApi key is user-supplied (BYOK) via Settings and forwarded per-request; it is never persisted server-side. A `source` parameter routes to the correct upstream, keeping the same stateless, no-logging contract.
+
+For local development, Vite registers a `local-api-proxy` plugin (`src/shared/dev/proxyPlugin.ts`) that serves the same `/api/proxy` endpoint, reusing the shared proxy logic in `src/shared/api/proxy/`.
+
 ### 4.6 Theme System
 
 Light/dark mode uses CSS custom properties defined in `index.html` with `prefers-color-scheme` media queries. Tailwind config references these variables. The theme is system-preference aware with no manual toggle — it follows the OS setting automatically.
@@ -282,7 +304,7 @@ Light/dark mode uses CSS custom properties defined in `index.html` with `prefers
 | `@react-pdf/renderer` | Generates selectable-text PDFs (not images) from React components. |
 | `pdfjs-dist` | Client-side PDF text extraction via web worker. |
 | `mammoth` | Client-side DOCX to HTML/text conversion. |
-| `react-diff-viewer-continued` | Visual diff between original and optimized CV. |
+| `react-diff-viewer-continued` | Listed in package.json but unused — CVDiffViewer implements a custom accordion diff with change summaries and ATS keyword display. |
 | `lucide-react` | Consistent icon set, tree-shakeable. |
 | `clsx` + `tailwind-merge` | Utility for conditional class names without conflicts. |
 | `react-i18next` | i18n with inline resource bundles (no external files). |

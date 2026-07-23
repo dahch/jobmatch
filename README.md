@@ -6,12 +6,12 @@
 
 ## Overview
 
-JobMatch AI helps you find job offers and tailor your CV for each one using AI. It connects to your preferred AI provider (OpenAI, Anthropic, Gemini, DeepSeek, OpenRouter, or any OpenAI-compatible endpoint), uses AI to generate matching job listings based on your profile, parses your existing CV, and generates ATS-optimized PDF versions tailored to specific job descriptions.
+JobMatch AI helps you find job offers and tailor your CV for each one using AI. It connects to your preferred AI provider (OpenAI, Anthropic, Gemini, DeepSeek, OpenRouter, or any OpenAI-compatible endpoint), discovers real job listings from multiple aggregator APIs (SerpApi Google Jobs, Arbeitnow) based on your search profile, parses your existing CV, and generates ATS-optimized PDF versions tailored to specific job descriptions.
 
 **Key capabilities:**
 
 - Multi-provider AI configuration (OpenAI, Anthropic, Google Gemini, DeepSeek, NVIDIA NIM, OpenRouter, OpenCode, Custom)
-- AI-generated job discovery matching your search profile
+- Real job discovery from SerpApi (Google Jobs, proxied) and Arbeitnow (direct, DACH-region only)
 - CV parsing from PDF, DOCX, and TXT files
 - AI-generated CVs optimized for specific job offers (ATS-friendly)
 - 3 PDF templates: Minimalist, Professional, Technical
@@ -29,7 +29,7 @@ JobMatch AI helps you find job offers and tailor your CV for each one using AI. 
 | Styling | Tailwind CSS v3 (CSS custom properties for theming) |
 | State | Zustand |
 | Architecture | Feature-Sliced Design |
-| PDF Generation | @react-pdf/renderer |
+| PDF Generation | @react-pdf/renderer v4 |
 | CV Parsing | pdfjs-dist, mammoth |
 | i18n | react-i18next (EN/ES) |
 | Routing | react-router-dom v6 (lazy-loaded with Suspense) |
@@ -66,9 +66,9 @@ JobMatch AI helps you find job offers and tailor your CV for each one using AI. 
    pnpm dev
    ```
 
-4. **Configure your AI provider**
+4. **Configure AI provider and job search**
 
-   Open the app, go to Settings, and enter your API key. Your key is stored in localStorage and never leaves your browser.
+   Open the app, go to Settings, enter your AI provider API key, and optionally add a SerpApi key for real job discovery from Google Jobs (free tier: 250 searches/month). Keys are stored in localStorage and never leave your browser.
 
 ## Available Scripts
 
@@ -90,7 +90,7 @@ The project follows [Feature-Sliced Design](https://feature-sliced.design/) (FSD
 src/
   app/              # App entry, router, global providers
   pages/            # Route-level components
-    SearchPage       # Define search criteria and trigger AI job search
+    SearchPage       # Define search criteria and trigger job search
     JobsPage         # Browse discovered/pasted job offers
     CVUploadPage     # Upload and parse your existing CV
     CVBuilderPage    # Edit and export optimized CVs
@@ -98,13 +98,15 @@ src/
     NotFoundPage     # 404 catch-all (lazy-loaded)
   features/         # Domain features (business logic + UI)
     ai-provider/     # Multi-provider AI abstraction layer
-    job-search/      # AI job discovery agent + match scoring
+    job-search/      # Multi-source job discovery + match scoring
     cv-parser/       # PDF/DOCX/TXT CV parsing
     cv-builder/      # CV optimization and PDF generation
   shared/           # Cross-cutting concerns
-    lib/             # Utilities (AI JSON parsing, i18n, localStorage)
+    api/proxy/       # Shared proxy logic (handler, AI providers, job sources)
+    dev/             # Vite dev plugin (proxyPlugin.ts, reuses shared proxy handler)
+    lib/             # Utilities (AI JSON parsing, i18n, localStorage, seo-config, utils)
     types/           # Shared TypeScript types (AI, CV, Job, Search)
-    ui/              # Design system (Button, Input, Badge, Modal, Layout, ...)
+    ui/              # Design system (Button, Input, Badge, Modal, Layout, SEO, StructuredData, ...)
 api/                # Vercel serverless functions (proxy for CORS-restricted providers)
 ```
 
@@ -122,34 +124,37 @@ features/<feature>/
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────────┐
-│                   UI Layer                        │
-│  Pages ──> Feature UI ──> Shared UI Components    │
-│  (Lazy-loaded with Suspense, wrapped in           │
-│   ErrorBoundary per route)                        │
-│  (Mobile: collapsible sidebar, responsive layout) │
-└──────────────┬───────────────────────────────────┘
+┌───────────────────────────────────────────────────┐
+│                   UI Layer                         │
+│  Pages ──> Feature UI ──> Shared UI Components     │
+│  (Lazy-loaded with Suspense, wrapped in            │
+│   ErrorBoundary per route)                         │
+│  (Mobile: collapsible sidebar, responsive layout)  │
+└──────────────┬────────────────────────────────────┘
                │
-┌──────────────▼───────────────────────────────────┐
-│              Feature Layer                        │
-│  ai-provider  job-search  cv-parser  cv-builder   │
-│  (stores + business logic per feature)            │
-└──────────────┬───────────────────────────────────┘
+┌──────────────▼────────────────────────────────────┐
+│              Feature Layer                         │
+│  ai-provider  job-search  cv-parser  cv-builder    │
+│  (stores + business logic per feature)             │
+└──────────────┬────────────────────────────────────┘
                │
-┌──────────────▼───────────────────────────────────┐
-│              Shared Layer                         │
-│  Types │ Lib (aiJson, i18n, storage, utils)       │
-│  UI kit (Button, Input, Modal, Badge, Spinner,    │
-│          Layout, ErrorBoundary, Textarea)         │
-└──────────────┬───────────────────────────────────┘
+┌──────────────▼────────────────────────────────────┐
+│              Shared Layer                          │
+│  Types │ Lib (aiJson, i18n, storage, utils)        │
+│  UI kit (Button, Input, Modal, Badge, Spinner,     │
+│          Layout, ErrorBoundary, Textarea)          │
+└──────────────┬────────────────────────────────────┘
                │
-┌──────────────▼───────────────────────────────────┐
-│          External (browser-only)                  │
-│  AI APIs ◄──── AI Client abstraction             │
-│             (direct browser access for most,       │
-│              /api/proxy for CORS-restricted)      │
-│  localStorage ◄── All user data persistence       │
-└──────────────────────────────────────────────────┘
+┌──────────────▼────────────────────────────────────┐
+│          External (browser-only)                   │
+│  AI APIs ◄──── AI Client abstraction              │
+│             (direct browser access for most,        │
+│              /api/proxy for CORS-restricted)       │
+│  Job Aggregators ◄── Source Adapters              │
+│  (SerpApi Google Jobs via /api/proxy,               │
+│   Arbeitnow direct — DACH/EU-remote only)          │
+│  localStorage ◄── All user data persistence        │
+└───────────────────────────────────────────────────┘
 ```
 
 ## Security & Privacy
@@ -161,7 +166,7 @@ JobMatch AI runs entirely in the browser. There is no backend server.
 - **No analytics, no tracking, no telemetry.**
 - **No data persistence beyond your browser.** Clearing localStorage removes all data.
 
-Some AI providers (e.g. NVIDIA NIM) don't allow direct browser CORS. For these, the app routes requests through a lightweight Vercel serverless proxy (`/api/proxy`). The proxy never logs or stores your API key or CV content.
+Some AI providers (e.g. NVIDIA NIM) don't allow direct browser CORS. For these, the app routes requests through a lightweight Vercel serverless proxy (`/api/proxy`). The same proxy also serves job sources that require proxied access — SerpApi (Google Jobs) has zero CORS support and requires a per-request API key (BYOK, user-supplied via Settings). The proxy never logs or stores your API key or CV content. Proxy logic is shared between the Vercel function and the Vite dev server via `src/shared/api/proxy/`.
 
 ## License
 

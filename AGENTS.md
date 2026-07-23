@@ -32,3 +32,11 @@ Use codegraph for **structural** questions — what calls what, what would break
 
 The MCP server returns "not initialized." Ask the user: *"I notice this project doesn't have CodeGraph initialized. Want me to run `codegraph init -i` to build the index?"*
 <!-- CODEGRAPH_END -->
+
+## Local development
+
+### API proxy
+
+Production routes AI provider requests through the Vercel serverless function at `api/proxy.ts`. For local development, Vite registers a `local-api-proxy` plugin (`src/shared/dev/proxyPlugin.ts`) that serves the same `/api/proxy` endpoint, reusing the shared proxy logic in `src/shared/api/proxy/`.
+
+The shared proxy modules are imported by both the Vercel function and the Vite plugin, so behavior stays in sync.
