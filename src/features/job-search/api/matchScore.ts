@@ -14,6 +14,13 @@ export interface MatchResult {
   missingTech: string[];
 }
 
+export function populateMatchScores(jobs: JobOffer[], cv: ParsedCV): JobOffer[] {
+  return jobs.map((job) => {
+    const result = calculateMatchScore(cv, job);
+    return { ...job, match_score: result.score };
+  });
+}
+
 export function calculateMatchScore(cv: ParsedCV, job: JobOffer): MatchResult {
   const cvSkills = new Set(
     cv.skills.flatMap((s) => (s.items || []).map((i) => i.toLowerCase())),
