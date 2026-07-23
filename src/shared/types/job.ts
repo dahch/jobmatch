@@ -1,3 +1,15 @@
+export interface ApplyOption {
+  title: string;
+  link: string;
+}
+
+export interface DetectedExtensions {
+  posted_at?: string;
+  schedule_type?: string;
+  salary?: string;
+  benefits?: string[];
+}
+
 export interface JobOffer {
   id: string;
   title: string;
@@ -20,4 +32,10 @@ export interface JobOffer {
   match_score?: number;
   status: "new" | "reviewing" | "applied" | "discarded";
   notes?: string;
+  // Extended fields from SerpApi / richer sources
+  apply_options?: ApplyOption[];
+  salary?: string;
+  schedule_type?: string;
+  benefits?: string[];
+  via?: string;
 }
