@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 
+coverage
+
 # Environment files
 .env
 .env.*

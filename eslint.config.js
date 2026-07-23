@@ -3,6 +3,9 @@ import tseslintPlugin from "@typescript-eslint/eslint-plugin";
 
 export default [
   {
+    ignores: ["coverage", "dist"],
+  },
+  {
     files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
       parser: tseslintParser,
