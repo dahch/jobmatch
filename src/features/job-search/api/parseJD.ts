@@ -7,10 +7,15 @@ import {
   parseAIJsonResponse,
 } from "@/shared/lib/aiJson";
 
+const MAX_JD_LENGTH = 10_000;
+const RE_CONTROL_CHARS = /[\x00-\x08\x0B\x0C\x0E-\x1F]/g;
+
 export async function parseJDText(
   config: AIClientConfig,
   rawText: string,
 ): Promise<JobOffer> {
+  const sanitized = rawText.replace(RE_CONTROL_CHARS, "").slice(0, MAX_JD_LENGTH);
+
   const prompt = `You are a recruitment specialist. Parse the following job description into a structured JSON object.
 
 Return a single job object with this schema:
@@ -40,7 +45,7 @@ RULES:
 - Return ONLY the JSON object, no markdown, no explanations.
 
 JOB DESCRIPTION TEXT:
-${rawText}`;
+${sanitized}`;
 
   const response = await chatCompletion(
     config,

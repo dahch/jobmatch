@@ -199,4 +199,34 @@ describe("parseJDText", () => {
     const result = await parseJDText(mockConfig, mockJDText);
     expect(result.extracted_requirements.years_experience).toBeUndefined();
   });
+
+  it("sanitizes control characters from input to prevent prompt injection", async () => {
+    vi.mocked(chatCompletion).mockResolvedValue({
+      content: JSON.stringify(validAIResponse),
+    });
+
+    const maliciousText = "Normal JD text\u0000with null byte\u0001and other\u001Fcontrols";
+    await parseJDText(mockConfig, maliciousText);
+
+    const sentContent = vi.mocked(chatCompletion).mock.calls[0][1][0].content;
+    expect(sentContent).not.toContain("\u0000");
+    expect(sentContent).not.toContain("\u0001");
+    expect(sentContent).not.toContain("\u001F");
+    expect(sentContent).toContain("Normal JD text");
+    expect(sentContent).toContain("with null byte");
+    expect(sentContent).toContain("and othercontrols");
+  });
+
+  it("truncates input longer than 10000 chars", async () => {
+    vi.mocked(chatCompletion).mockResolvedValue({
+      content: JSON.stringify(validAIResponse),
+    });
+
+    const longText = "A".repeat(15000);
+    await parseJDText(mockConfig, longText);
+
+    const sentContent = vi.mocked(chatCompletion).mock.calls[0][1][0].content;
+    expect(sentContent.length).toBeLessThan(15000);
+    expect(sentContent).toContain("A".repeat(10000));
+  });
 });
