@@ -37,6 +37,6 @@ The MCP server returns "not initialized." Ask the user: *"I notice this project 
 
 ### API proxy
 
-Production routes AI provider requests through the Vercel serverless function at `api/proxy.ts`. For local development, Vite registers a `local-api-proxy` plugin (`src/shared/dev/proxyPlugin.ts`) that serves the same `/api/proxy` endpoint, reusing the shared proxy logic in `src/shared/api/proxy/`.
+Production routes AI provider requests through the Vercel serverless function at `api/proxy.ts`. For local development, Vite registers a `local-api-proxy` plugin (`src/shared/dev/proxyPlugin.ts`) that serves the same `/api/proxy` endpoint, reusing the shared proxy logic in `api/shared/proxy/`.
 
 The shared proxy modules are imported by both the Vercel function and the Vite plugin, so behavior stays in sync.

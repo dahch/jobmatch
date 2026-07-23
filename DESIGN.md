@@ -288,7 +288,7 @@ NVIDIA NIM doesn't support browser CORS. Rather than blocking the provider, requ
 
 The proxy was extended in ADR-013 to also serve job sources that require a hidden API key or lack CORS. SerpApi (Google Jobs) is the primary proxied job source — it has zero CORS support, so every search round-trips through the proxy. The SerpApi key is user-supplied (BYOK) via Settings and forwarded per-request; it is never persisted server-side. A `source` parameter routes to the correct upstream, keeping the same stateless, no-logging contract.
 
-For local development, Vite registers a `local-api-proxy` plugin (`src/shared/dev/proxyPlugin.ts`) that serves the same `/api/proxy` endpoint, reusing the shared proxy logic in `src/shared/api/proxy/`.
+For local development, Vite registers a `local-api-proxy` plugin (`src/shared/dev/proxyPlugin.ts`) that serves the same `/api/proxy` endpoint, reusing the shared proxy logic in `api/shared/proxy/`.
 
 ### 4.6 Theme System
 

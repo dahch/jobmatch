@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import type { Plugin } from "vite";
 import type { IncomingMessage, ServerResponse } from "http";
-import { handleProxyRequest, isAllowedOrigin } from "../api/proxy/handler";
+import { handleProxyRequest, isAllowedOrigin } from "../../../api/shared/proxy/handler";
 
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {

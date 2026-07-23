@@ -166,7 +166,7 @@ JobMatch AI runs entirely in the browser. There is no backend server.
 - **No analytics, no tracking, no telemetry.**
 - **No data persistence beyond your browser.** Clearing localStorage removes all data.
 
-Some AI providers (e.g. NVIDIA NIM) don't allow direct browser CORS. For these, the app routes requests through a lightweight Vercel serverless proxy (`/api/proxy`). The same proxy also serves job sources that require proxied access — SerpApi (Google Jobs) has zero CORS support and requires a per-request API key (BYOK, user-supplied via Settings). The proxy never logs or stores your API key or CV content. Proxy logic is shared between the Vercel function and the Vite dev server via `src/shared/api/proxy/`.
+Some AI providers (e.g. NVIDIA NIM) don't allow direct browser CORS. For these, the app routes requests through a lightweight Vercel serverless proxy (`/api/proxy`). The same proxy also serves job sources that require proxied access — SerpApi (Google Jobs) has zero CORS support and requires a per-request API key (BYOK, user-supplied via Settings). The proxy never logs or stores your API key or CV content. Proxy logic is shared between the Vercel function and the Vite dev server via `api/shared/proxy/`.
 
 ## License
 
