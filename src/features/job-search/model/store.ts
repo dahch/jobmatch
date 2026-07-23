@@ -1,7 +1,10 @@
 import { create } from "zustand";
-import type { JobOffer, AIClientConfig } from "@/shared/types";
+import type { JobOffer } from "@/shared/types";
 import { getStorageItem, setStorageItem } from "@/shared/lib/storage";
 import { searchJobs } from "@/features/job-search/api/jobSearchAgent";
+import { useJobSearchStore } from "@/features/job-search/model/profileStore";
+import { useCVStore } from "@/features/cv-builder/model/store";
+import { populateMatchScores } from "@/features/job-search/api/matchScore";
 
 interface SearchProgress {
   phase: string;
@@ -13,8 +16,9 @@ interface JobsStore {
   isSearching: boolean;
   searchProgress: SearchProgress | null;
   searchError: string | null;
+  searchWarnings: string[];
   selectedJobId: string | null;
-  searchJobs: (config: AIClientConfig) => Promise<void>;
+  searchJobs: () => Promise<void>;
   selectJob: (id: string) => void;
   updateJobStatus: (id: string, status: JobOffer["status"]) => void;
   clearJobs: () => void;
@@ -23,23 +27,23 @@ interface JobsStore {
 
 const STORAGE_KEY = "jobs";
 
+let currentAbortController: AbortController | null = null;
+
 export const useJobsStore = create<JobsStore>((set, get) => ({
   jobs: getStorageItem<JobOffer[]>(STORAGE_KEY) || [],
   isSearching: false,
   searchProgress: null,
   searchError: null,
+  searchWarnings: [],
   selectedJobId: null,
 
-  searchJobs: async (config) => {
-    const { useJobSearchStore } =
-      await import("@/features/job-search/model/profileStore");
+  searchJobs: async () => {
+    currentAbortController?.abort();
+    currentAbortController = new AbortController();
+    const signal = currentAbortController.signal;
 
     const profile = useJobSearchStore.getState().profile;
 
-    if (!config) {
-      set({ searchError: "AI provider not configured. Go to Settings first." });
-      return;
-    }
     if (!profile) {
       set({
         searchError: "Search profile not defined. Set your criteria first.",
@@ -50,21 +54,32 @@ export const useJobsStore = create<JobsStore>((set, get) => ({
     set({
       isSearching: true,
       searchError: null,
+      searchWarnings: [],
       searchProgress: { phase: "Starting search..." },
     });
 
     try {
-      const newJobs = await searchJobs(config, profile, (progress) => {
+      const warnings: string[] = [];
+      let newJobs = await searchJobs(profile, (progress) => {
         set({ searchProgress: progress });
-      });
+      }, signal, (w) => warnings.push(w));
+
+      if (signal.aborted) return;
+
+      const parsedCV = useCVStore.getState().parsedCV;
+      if (parsedCV) {
+        newJobs = populateMatchScores(newJobs, parsedCV);
+      }
 
       setStorageItem(STORAGE_KEY, newJobs);
       set({
         jobs: newJobs,
         isSearching: false,
+        searchWarnings: warnings,
         searchProgress: { phase: `Found ${newJobs.length} jobs` },
       });
     } catch (err) {
+      if (signal.aborted) return;
       const msg = err instanceof Error ? err.message : "Search failed";
       set({ searchError: msg, isSearching: false, searchProgress: null });
     }

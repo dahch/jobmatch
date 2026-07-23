@@ -1,13 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, X, Loader2, ChevronDown } from "lucide-react";
+import { Search, Plus, X, Loader2, ChevronDown, AlertTriangle } from "lucide-react";
 import { Layout } from "@/shared/ui/Layout";
 import { SEO } from "@/shared/ui/SEO";
 import { Button, Input, Textarea } from "@/shared/ui";
 import { useJobSearchStore } from "@/features/job-search/model/profileStore";
 import { useJobsStore } from "@/features/job-search/model/store";
-import { useAIProviderStore } from "@/features/ai-provider/model/store";
 import type { SearchProfile, Modality, Seniority } from "@/shared/types";
 
 function TagInput({
@@ -52,6 +51,7 @@ function TagInput({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), add())}
+          onBlur={add}
           placeholder={placeholder}
           className="block flex-1 rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-surface-800 placeholder:text-surface-400 hover:border-surface-300 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400"
         />
@@ -71,30 +71,44 @@ export function SearchPage() {
     isSearching,
     searchProgress,
     searchError,
+    searchWarnings,
     searchJobs: runSearch,
   } = useJobsStore();
-  const aiConfig = useAIProviderStore((s) => s.config);
 
-  const [form, setForm] = useState<SearchProfile>(
-    profile || {
-      job_titles: [],
-      technologies: [],
-      location: "",
-      modality: "Any",
-      seniority: "Any",
-      exclude_keywords: [],
-      extra_context: "",
-    },
-  );
+  const defaultForm: SearchProfile = {
+    job_titles: [],
+    technologies: [],
+    location: "",
+    modality: "Any",
+    seniority: "Any",
+    exclude_keywords: [],
+    extra_context: "",
+  };
+
+  const [form, setForm] = useState<SearchProfile>(profile || defaultForm);
+  const hydrated = useRef(false);
+
+  useEffect(() => {
+    if (profile && !hydrated.current) {
+      setForm(profile);
+      hydrated.current = true;
+    }
+  }, [profile]);
+
+  useEffect(() => {
+    if (profile) {
+      setForm(profile);
+    }
+  }, [profile]);
 
   const handleSave = () => {
     setProfile(form);
   };
 
-  const handleSearch = async () => {
-    if (!aiConfig) return;
+  const handleSearch = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     setProfile(form);
-    await runSearch(aiConfig);
+    await runSearch();
     navigate("/jobs");
   };
 
@@ -115,7 +129,10 @@ export function SearchPage() {
         </p>
       </div>
 
-      <div className="card p-6 max-w-xl space-y-5 animate-fade-in">
+      <form
+        onSubmit={handleSearch}
+        className="card p-6 max-w-xl space-y-5 animate-fade-in"
+      >
         <div className="space-y-1.5">
           <label className="text-[13px] font-medium text-surface-600 block">
             {t("search.job_titles")}
@@ -221,29 +238,33 @@ export function SearchPage() {
         />
 
         <div className="flex items-center gap-3 pt-3 border-t border-surface-100">
-          <Button onClick={handleSave} variant="outline">
+          <Button type="button" onClick={handleSave} variant="outline">
             {t("search.save")}
           </Button>
-          <Button
-            onClick={handleSearch}
-            isLoading={isSearching}
-            disabled={!aiConfig}
-          >
+          <Button type="submit" isLoading={isSearching}>
             {isSearching
               ? searchProgress?.phase || "Searching..."
               : t("search.search_button")}
           </Button>
         </div>
 
-        {!aiConfig && (
-          <p className="text-xs text-amber-600">
-            {t("search_page.configure_provider")}
-          </p>
-        )}
-
         {searchError && (
           <div className="bg-red-50 border border-red-200/60 rounded-lg p-3 text-sm text-red-600">
             {searchError}
+          </div>
+        )}
+
+        {searchWarnings.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200/60 rounded-lg p-3 text-sm text-amber-700 space-y-1">
+            <div className="flex items-center gap-1.5 font-medium">
+              <AlertTriangle size={14} />
+              <span>Search warnings</span>
+            </div>
+            <ul className="list-disc list-inside space-y-0.5 text-amber-600">
+              {searchWarnings.map((w, i) => (
+                <li key={i}>{w}</li>
+              ))}
+            </ul>
           </div>
         )}
 
@@ -258,7 +279,7 @@ export function SearchPage() {
             )}
           </div>
         )}
-      </div>
+      </form>
     </Layout>
   );
 }

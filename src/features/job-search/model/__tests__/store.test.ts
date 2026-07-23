@@ -3,6 +3,14 @@ import type { JobOffer } from "@/shared/types";
 
 const { mockStorage } = vi.hoisted(() => ({ mockStorage: {} as Record<string, string> }));
 
+const { mockSearchJobs, mockProfileState } = vi.hoisted(() => {
+  type MockProfile = { job_titles: string[]; technologies: string[]; location: string; modality: string; seniority: string; exclude_keywords: string[]; extra_context: string };
+  return {
+    mockSearchJobs: vi.fn(),
+    mockProfileState: { profile: null as MockProfile | null },
+  };
+});
+
 vi.mock("@/shared/lib/storage", () => ({
   getStorageItem: vi.fn((key: string) => {
     const raw = mockStorage[key];
@@ -16,6 +24,16 @@ vi.mock("@/shared/lib/storage", () => ({
   setStorageItem: vi.fn((key: string, value: unknown) => {
     mockStorage[key] = JSON.stringify(value);
   }),
+}));
+
+vi.mock("@/features/job-search/api/jobSearchAgent", () => ({
+  searchJobs: mockSearchJobs,
+}));
+
+vi.mock("@/features/job-search/model/profileStore", () => ({
+  useJobSearchStore: {
+    getState: () => mockProfileState,
+  },
 }));
 
 import { useJobsStore } from "@/features/job-search/model/store";
@@ -138,6 +156,124 @@ describe("useJobsStore", () => {
 
       expect(useJobsStore.getState().jobs).toEqual([]);
       expect(useJobsStore.getState().selectedJobId).toBeNull();
+    });
+  });
+
+  describe("searchJobs action", () => {
+    const testProfile = {
+      job_titles: ["Dev"],
+      technologies: [],
+      location: "",
+      modality: "Any" as const,
+      seniority: "Any" as const,
+      exclude_keywords: [],
+      extra_context: "",
+    };
+
+    beforeEach(() => {
+      mockSearchJobs.mockReset();
+      mockProfileState.profile = null;
+    });
+
+    it("sets searchError when no profile is defined", async () => {
+      mockProfileState.profile = null;
+      await useJobsStore.getState().searchJobs();
+      expect(useJobsStore.getState().searchError).toBe(
+        "Search profile not defined. Set your criteria first.",
+      );
+      expect(useJobsStore.getState().isSearching).toBe(false);
+    });
+
+    it("sets isSearching to true when starting search", async () => {
+      mockProfileState.profile = testProfile;
+      mockSearchJobs.mockResolvedValue([]);
+
+      const promise = useJobsStore.getState().searchJobs();
+      await promise;
+
+      expect(useJobsStore.getState().isSearching).toBe(false);
+    });
+
+    it("stores jobs and updates progress on success", async () => {
+      mockProfileState.profile = testProfile;
+      const returnedJobs: JobOffer[] = [
+        { ...mockJob, id: "new-1", title: "Found Job" },
+      ];
+      mockSearchJobs.mockResolvedValue(returnedJobs);
+
+      await useJobsStore.getState().searchJobs();
+
+      expect(useJobsStore.getState().jobs).toEqual(returnedJobs);
+      expect(useJobsStore.getState().isSearching).toBe(false);
+      expect(useJobsStore.getState().searchProgress?.phase).toContain(
+        "Found 1 jobs",
+      );
+    });
+
+    it("sets searchError when searchJobs throws", async () => {
+      mockProfileState.profile = testProfile;
+      mockSearchJobs.mockRejectedValue(new Error("API unavailable"));
+
+      await useJobsStore.getState().searchJobs();
+
+      expect(useJobsStore.getState().searchError).toBe("API unavailable");
+      expect(useJobsStore.getState().isSearching).toBe(false);
+      expect(useJobsStore.getState().searchProgress).toBeNull();
+    });
+
+    it("persists jobs to storage on success", async () => {
+      mockProfileState.profile = testProfile;
+      const returnedJobs: JobOffer[] = [
+        { ...mockJob, id: "stored-1" },
+      ];
+      mockSearchJobs.mockResolvedValue(returnedJobs);
+
+      await useJobsStore.getState().searchJobs();
+
+      expect(mockStorage["jobs"]).toBeDefined();
+      const parsed = JSON.parse(mockStorage["jobs"]);
+      expect(parsed).toHaveLength(1);
+      expect(parsed[0].id).toBe("stored-1");
+    });
+
+    it("handles empty results from searchJobs gracefully", async () => {
+      mockProfileState.profile = testProfile;
+      mockSearchJobs.mockResolvedValue([]);
+
+      await useJobsStore.getState().searchJobs();
+
+      const state = useJobsStore.getState();
+      expect(state.searchError).toBeNull();
+      expect(state.jobs).toEqual([]);
+      expect(state.isSearching).toBe(false);
+      expect(state.searchProgress?.phase).toContain("Found 0");
+    });
+
+    it("handles non-Error throw in searchJobs (e.g. string rejection)", async () => {
+      mockProfileState.profile = testProfile;
+      mockSearchJobs.mockRejectedValue("string error");
+
+      await useJobsStore.getState().searchJobs();
+
+      expect(useJobsStore.getState().searchError).toBe("Search failed");
+      expect(useJobsStore.getState().isSearching).toBe(false);
+    });
+
+    it("updates searchProgress via onProgress callback", async () => {
+      mockProfileState.profile = testProfile;
+      mockSearchJobs.mockImplementation(
+        async (
+          _profile: unknown,
+          onProgress?: (p: { phase: string; detail?: string }) => void,
+        ) => {
+          onProgress?.({ phase: "Fetching from source..." });
+          return [{ ...mockJob, id: "progress-job" }];
+        },
+      );
+
+      await useJobsStore.getState().searchJobs();
+
+      expect(useJobsStore.getState().searchProgress?.phase).toContain("Found");
     });
   });
 });
