@@ -167,6 +167,10 @@ const resources = {
         fetching: "Fetching...",
         loading_models: "Loading models...",
         placeholder_model: "e.g. gpt-4o",
+        serpapi_section: "Job Search API Key",
+        serpapi_api_key: "SerpApi Key",
+        serpapi_hint:
+          "Free tier: 250 searches/month. Your key is sent through the proxy per-search, never stored server-side.",
       },
       not_found: {
         message: "The page you're looking for doesn't exist or has been moved.",
@@ -345,6 +349,10 @@ const resources = {
         fetching: "Obteniendo...",
         loading_models: "Cargando modelos...",
         placeholder_model: "ej. gpt-4o",
+        serpapi_section: "API de Búsqueda de Empleo",
+        serpapi_api_key: "Clave SerpApi",
+        serpapi_hint:
+          "Plan gratuito: 250 búsquedas/mes. Tu clave se envía a través del proxy por búsqueda, nunca se almacena en el servidor.",
       },
       not_found: {
         message:

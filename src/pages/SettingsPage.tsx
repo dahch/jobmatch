@@ -7,11 +7,13 @@ import {
   RefreshCw,
   ChevronDown,
   Zap,
+  Search,
 } from "lucide-react";
 import { Layout } from "@/shared/ui/Layout";
 import { SEO } from "@/shared/ui/SEO";
 import { Button, Input } from "@/shared/ui";
 import { useAIProviderStore } from "@/features/ai-provider/model/store";
+import { useSerpApiStore } from "@/features/job-search/model/serpApiStore";
 import { PROVIDER_MODELS, PROVIDERS } from "@/shared/types";
 import { listModels } from "@/shared/api/aiClient";
 import type { Provider } from "@/shared/types";
@@ -38,6 +40,8 @@ export function SettingsPage() {
   const [model, setModel] = useState(config?.model || "");
   const [baseUrl, setBaseUrl] = useState(config?.baseUrl || "");
   const [testing, setTesting] = useState(false);
+
+  const { apiKey: serpApiKey, setApiKey: setSerpApiKey } = useSerpApiStore();
 
   const [fetchedModels, setFetchedModels] = useState<string[]>([]);
   const [fetchingModels, setFetchingModels] = useState(false);
@@ -308,6 +312,27 @@ export function SettingsPage() {
               <AlertCircle size={15} /> {t("settings.connection_fail")}
             </span>
           )}
+        </div>
+      </div>
+
+      <div className="mt-5 max-w-xl">
+        <div className="card p-6 space-y-4 animate-fade-in">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-9 h-9 rounded-xl bg-surface-100 flex items-center justify-center">
+              <Search size={18} className="text-surface-500" />
+            </div>
+            <h2 className="text-base font-semibold text-surface-800">
+              {t("settings_page.serpapi_section")}
+            </h2>
+          </div>
+          <Input
+            label={t("settings_page.serpapi_api_key")}
+            type="password"
+            value={serpApiKey}
+            onChange={(e) => setSerpApiKey(e.target.value)}
+            placeholder="serpapi-..."
+            hint={t("settings_page.serpapi_hint")}
+          />
         </div>
       </div>
 
