@@ -1,3 +1,5 @@
+import { handleProxyRequest, isAllowedOrigin } from "../src/shared/api/proxy/handler";
+
 interface VercelRequest {
   method: string;
   body: Record<string, unknown>;
@@ -12,20 +14,36 @@ interface VercelResponse {
   end(): VercelResponse;
 }
 
-const ALLOWED_HOSTS = [
-  "integrate.api.nvidia.com",
-  "api.openai.com",
-  "openrouter.ai",
-  "api.deepseek.com",
-  "api.anthropic.com",
-  "generativelanguage.googleapis.com",
-];
+function getOrigin(req: VercelRequest): string {
+  return req.headers["origin"] || req.headers["referer"] || "";
+}
 
-export default async function handler(
-  req: VercelRequest,
+function sendResult(
   res: VercelResponse,
-) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  result: {
+    status: number;
+    headers: Record<string, string>;
+    body: string;
+  },
+): VercelResponse {
+  res.status(result.status);
+  for (const [name, value] of Object.entries(result.headers)) {
+    res.setHeader(name, value);
+  }
+  if (
+    result.status >= 400 &&
+    result.headers["Content-Type"] === "application/json"
+  ) {
+    return res.json(JSON.parse(result.body));
+  }
+  return res.send(result.body);
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const origin = getOrigin(req);
+  const allowedOrigin = isAllowedOrigin(origin);
+
+  res.setHeader("Access-Control-Allow-Origin", allowedOrigin ? origin : "null");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
@@ -38,47 +56,21 @@ export default async function handler(
   }
 
   // Vercel may deliver req.body as a raw string instead of a parsed object
-  const raw: unknown = req.body;
-  const payload = typeof raw === "string" ? JSON.parse(raw) : raw;
-  const { targetUrl, headers, body } = payload as {
-    targetUrl?: string;
-    headers?: Record<string, string>;
-    body?: unknown;
-  };
-
-  if (!targetUrl) {
-    return res.status(400).json({ error: "Missing targetUrl" });
-  }
-
-  if (!body || typeof body !== "object") {
-    return res.status(400).json({ error: "Missing or invalid body" });
-  }
-
+  let payload: Record<string, unknown>;
   try {
-    const parsedUrl = new URL(targetUrl);
-    if (!ALLOWED_HOSTS.includes(parsedUrl.hostname)) {
-      return res.status(403).json({ error: "Host not allowed" });
-    }
+    const raw: unknown = req.body;
+    payload =
+      typeof raw === "string"
+        ? JSON.parse(raw)
+        : (raw as Record<string, unknown>);
   } catch {
-    return res.status(400).json({ error: "Invalid targetUrl" });
+    return res.status(400).json({ error: "Invalid JSON body" });
   }
 
-  try {
-    const upstream = await fetch(targetUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await upstream.text();
-
-    res.setHeader("Content-Type", "application/json");
-    return res.status(upstream.status).send(data);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Proxy error";
-    return res.status(502).json({ error: message });
+  if (!payload || typeof payload !== "object") {
+    return res.status(400).json({ error: "Body must be a JSON object" });
   }
+
+  const result = await handleProxyRequest(payload);
+  return sendResult(res, result);
 }
